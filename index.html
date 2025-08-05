@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <title>Kalkulator półki na filamenty</title>
+  <title>Kalkulator Półek na filamenty z systemu IKEA Komplement</title>
   <style>
     body {
       font-family: sans-serif;
@@ -126,28 +126,28 @@
   </style>
 </head>
 <body>
-  <h2>Kalkulator półki na filamenty</h2>
+  <h2>Kalkulator Półek na filamenty z systemu IKEA Komplement</h2>
 
-  <p>Podaj liczbę segmentów dla każdej długości rury:</p>
+  <p>Wybierz swoje segmenty:</p>
 
   <label>
-    Segmenty 50 cm (450 mm):
+    Segmenty z IKEA Komplement 50 cm:
     <input type="number" id="seg50" min="0" value="0" />
   </label>
 
   <label>
-    Segmenty 75 cm (700 mm):
+    Segmenty z IKEA Komplement 75 cm:
     <input type="number" id="seg75" min="0" value="0" />
   </label>
 
   <label>
-    Segmenty 100 cm (950 mm):
+    Segmenty z IKEA Komplement 100 cm:
     <input type="number" id="seg100" min="0" value="0" />
   </label>
 
   <button onclick="calculate()">Oblicz</button>
 
-  <h3>Wynik:</h3>
+  <h3>Twoja półka:</h3>
   <pre id="output"></pre>
 
   <div id="shelf-container"></div>
@@ -191,9 +191,9 @@
 
       const result = `
 📦 Dane wejściowe:
-- Segmenty 50 cm: ${seg50}
-- Segmenty 75 cm: ${seg75}
-- Segmenty 100 cm: ${seg100}
+- Segmenty z IKEA Komplement 50 cm: ${seg50}
+- Segmenty z IKEA Komplement 75 cm: ${seg75}
+- Segmenty z IKEA Komplement 100 cm: ${seg100}
 - Łącznie segmentów: ${totalSegments}
 
 🔩 Wsporniki:
