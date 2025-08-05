@@ -360,9 +360,9 @@
 
   const supportWidth = Math.max(width / 10, 6); // szerokość zależna od długości rury
   support.style.width = supportWidth + 'px';
-  support.style.left = '50%';
-  support.style.transform = 'translateX(-50%)';
-
+  const supportLeft = width / 2 - supportWidth / 2;
+support.style.left = supportLeft + 'px';
+support.style.transform = ''; // Niepotrzebne, bo już offsetujesz ręcznie
   rod.appendChild(support);
 }
 
