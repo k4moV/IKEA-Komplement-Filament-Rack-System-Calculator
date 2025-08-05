@@ -181,7 +181,7 @@
       </div>
       <div class="output-columns">
         <div class="output-column">
-          <div class="section-title">Wymiary i wsporniki</div>
+          <div class="section-title">Wsporniki do wydrukowania</div>
           <div id="bracketCounts" class="bracket-info"></div>
         </div>
         <div class="output-column">
@@ -240,11 +240,13 @@
       };
 
       document.getElementById('shelfLength').innerText = `${totalLength} mm`;
-      document.getElementById('bracketCounts').innerHTML =
-        `<span class="green">Wspornik lewy: ${bracketCounts.left}</span>` +
-        `<span class="green">Wspornik prawy: ${bracketCounts.right}</span>` +
-        `<span class="red">Wspornik łączący: ${bracketCounts.connector}</span>` +
-        `<span class="yellow">Wspornik podtrzymujący: ${bracketCounts.support}</span>`;
+
+      let bracketHTML = '';
+      if (bracketCounts.left > 0) bracketHTML += `<span class="green">Wspornik lewy: ${bracketCounts.left}</span>`;
+      if (bracketCounts.right > 0) bracketHTML += `<span class="green">Wspornik prawy: ${bracketCounts.right}</span>`;
+      if (bracketCounts.connector > 0) bracketHTML += `<span class="red">Wspornik łączący: ${bracketCounts.connector}</span>`;
+      if (bracketCounts.support > 0) bracketHTML += `<span class="yellow">Wspornik podtrzymujący: ${bracketCounts.support}</span>`;
+      document.getElementById('bracketCounts').innerHTML = bracketHTML;
 
       let ikeaHTML = '';
       Object.keys(ikeaItems).forEach(k => {
