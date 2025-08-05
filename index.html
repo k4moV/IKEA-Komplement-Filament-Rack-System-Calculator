@@ -122,7 +122,7 @@
 
     .bracket.support {
       background-color: yellow;
-      width: 10px;
+      width: auto;
       height: 20px;
       position: absolute;
       top: 0;
@@ -347,7 +347,8 @@
         if (seg === 75 || seg === 100) {
           const support = document.createElement('div');
           support.className = 'bracket support';
-          support.style.left = '50%';
+          const supportWidth = width / 10; 
+          support.style.left = (width / 2 - supportWidth / 2) + 'px';
           support.style.transform = 'translateX(-50%)';
           rod.appendChild(support);
         }
