@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Kalkulator półki na filamenty</title>
+</head>
+<body>
+  <h2>Kalkulator półki na filamenty</h2>
+
+  <p>Podaj liczbę segmentów dla każdej długości rury:</p>
+
+  <label for="seg50">Segmenty 50 cm (450 mm):</label>
+  <input type="number" id="seg50" min="0" value="0"><br><br>
+
+  <label for="seg75">Segmenty 75 cm (700 mm):</label>
+  <input type="number" id="seg75" min="0" value="0"><br><br>
+
+  <label for="seg100">Segmenty 100 cm (950 mm):</label>
+  <input type="number" id="seg100" min="0" value="0"><br><br>
+
+  <button onclick="calculate()">Oblicz</button>
+
+  <h3>Wynik:</h3>
+  <pre id="output"></pre>
+
+  <script>
+    function calculate() {
+      const seg50 = parseInt(document.getElementById("seg50").value) || 0;
+      const seg75 = parseInt(document.getElementById("seg75").value) || 0;
+      const seg100 = parseInt(document.getElementById("seg100").value) || 0;
+
+      const totalSegments = seg50 + seg75 + seg100;
+
+      // Rury
+      const pipeLengths = {
+        "50": 450,
+        "75": 700,
+        "100": 950
+      };
+
+      const pipes50 = seg50 * 2;
+      const pipes75 = seg75 * 2;
+      const pipes100 = seg100 * 2;
+
+      const totalPipeLength =
+        pipes50 * pipeLengths["50"] +
+        pipes75 * pipeLengths["75"] +
+        pipes100 * pipeLengths["100"];
+
+      // Wsporniki
+      const leftBracket = 1;
+      const rightBracket = 1;
+      const joiningBrackets = Math.max(0, totalSegments - 1);
+      const supportBrackets = seg75 + seg100;
+
+      // Dodatkowa długość od wsporników
+      const extraLength =
+        (leftBracket + rightBracket) * 20 + joiningBrackets * 10;
+
+      const totalShelfLength = totalPipeLength + extraLength;
+
+      const result = `
+📦 Dane wejściowe:
+- Segmenty 50 cm: ${seg50}
+- Segmenty 75 cm: ${seg75}
+- Segmenty 100 cm: ${seg100}
+- Łącznie segmentów: ${totalSegments}
+
+🔩 Wsporniki:
+- Lewy zamykający: ${leftBracket}
+- Prawy zamykający: ${rightBracket}
+- Łączące: ${joiningBrackets}
+- Podtrzymujące (dla rur 75/100 cm): ${supportBrackets}
+
+🧰 Rury:
+- 450 mm: ${pipes50} szt.
+- 700 mm: ${pipes75} szt.
+- 950 mm: ${pipes100} szt.
+- Łączna długość rur: ${totalPipeLength} mm
+
+➕ Dodatkowa długość od wsporników: ${extraLength} mm
+
+📏 Całkowita długość półki: ${totalShelfLength} mm (${(totalShelfLength / 1000).toFixed(2)} m)
+      `;
+
+      document.getElementById("output").innerText = result;
+    }
+  </script>
+</body>
+</html>
