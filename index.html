@@ -52,8 +52,8 @@
     }
 
     .calculate-button {
-      padding: 10px 20px;
-      font-size: 1em;
+      padding: 12px 24px;
+      font-size: 1.1em;
       background-color: #4CAF50;
       color: white;
       border: none;
@@ -119,6 +119,7 @@
       background-color: #888;
       display: inline-block;
       position: relative;
+      border-radius: 0;
     }
 
     .output-columns {
@@ -217,39 +218,33 @@
       const seg75 = parseInt(document.getElementById('seg75').value) || 0;
       const seg100 = parseInt(document.getElementById('seg100').value) || 0;
 
-      const segments = [
-        { length: 50, count: seg50 },
-        { length: 75, count: seg75 },
-        { length: 100, count: seg100 }
-      ];
+      const segments = [];
+      for (let i = 0; i < seg50; i++) segments.push(50);
+      for (let i = 0; i < seg75; i++) segments.push(75);
+      for (let i = 0; i < seg100; i++) segments.push(100);
 
-      let totalLength = 0;
-      let totalBrackets = { left: 0, right: 0, connector: 0, support: 0 };
-      let ikeaItems = { '50': 0, '75': 0, '100': 0 };
+      const totalLength = segments.reduce((acc, val) => acc + ROD_LENGTHS[val], 0)
+        + 20 + 20 + (segments.length - 1) * 10;
 
-      segments.forEach((seg, index) => {
-        for (let i = 0; i < seg.count; i++) {
-          let len = ROD_LENGTHS[seg.length] + 20 + 20; // left + right bracket = 40mm
-          if (index > 0 || i > 0) {
-            len -= 20; // remove one right bracket
-            totalBrackets.connector++;
-          } else {
-            totalBrackets.left++;
-          }
-          totalBrackets.right++;
-          if (seg.length !== 50) totalBrackets.support++;
-          totalLength += len;
-          ikeaItems[seg.length] += 2; // two rods per segment
-        }
-      });
+      const bracketCounts = {
+        left: segments.length > 0 ? 1 : 0,
+        right: segments.length > 0 ? 1 : 0,
+        connector: Math.max(0, segments.length - 1),
+        support: segments.filter(len => len === 75 || len === 100).length
+      };
+
+      const ikeaItems = {
+        '50': seg50 * 2,
+        '75': seg75 * 2,
+        '100': seg100 * 2
+      };
 
       document.getElementById('shelfLength').innerText = `${totalLength} mm`;
-
       document.getElementById('bracketCounts').innerHTML =
-        `<span class="green">Wspornik lewy: ${totalBrackets.left}</span>` +
-        `<span class="green">Wspornik prawy: ${totalBrackets.right}</span>` +
-        `<span class="red">Wspornik łączący: ${totalBrackets.connector}</span>` +
-        `<span class="yellow">Wspornik podtrzymujący: ${totalBrackets.support}</span>`;
+        `<span class="green">Wspornik lewy: ${bracketCounts.left}</span>` +
+        `<span class="green">Wspornik prawy: ${bracketCounts.right}</span>` +
+        `<span class="red">Wspornik łączący: ${bracketCounts.connector}</span>` +
+        `<span class="yellow">Wspornik podtrzymujący: ${bracketCounts.support}</span>`;
 
       let ikeaHTML = '';
       Object.keys(ikeaItems).forEach(k => {
@@ -265,39 +260,42 @@
     function renderVisualization(segments, color) {
       const container = document.getElementById('visualization');
       container.innerHTML = '';
-      segments.forEach(seg => {
-        for (let i = 0; i < seg.count; i++) {
-          const row = document.createElement('div');
-          row.className = 'shelf-row';
-          row.style.position = 'relative';
+      const row = document.createElement('div');
+      row.className = 'shelf-row';
+      row.style.position = 'relative';
 
-          const left = document.createElement('div');
-          left.className = 'bracket left';
-          row.appendChild(left);
+      const left = document.createElement('div');
+      left.className = 'bracket left';
+      row.appendChild(left);
 
-          const rod = document.createElement('div');
-          rod.className = 'rod';
-          rod.style.backgroundColor = color === 'gray' ? '#666' : '#ccc';
+      segments.forEach((seg, index) => {
+        const rod = document.createElement('div');
+        rod.className = 'rod';
+        rod.style.backgroundColor = color === 'gray' ? '#666' : '#ccc';
+        const width = ROD_LENGTHS[seg] / 5;
+        rod.style.width = width + 'px';
 
-          let rodLengthPx = ROD_LENGTHS[seg.length] / 10;
-          rod.style.width = rodLengthPx + 'px';
+        if (seg === 75 || seg === 100) {
+          const support = document.createElement('div');
+          support.className = 'bracket support';
+          support.style.left = (width / 2 - 5) + 'px';
+          rod.appendChild(support);
+        }
 
-          if (seg.length !== 50) {
-            const support = document.createElement('div');
-            support.className = 'bracket support';
-            support.style.left = (rodLengthPx / 2 - 5) + 'px';
-            rod.appendChild(support);
-          }
+        row.appendChild(rod);
 
-          row.appendChild(rod);
-
-          const right = document.createElement('div');
-          right.className = 'bracket right';
-          row.appendChild(right);
-
-          container.appendChild(row);
+        if (index < segments.length - 1) {
+          const connector = document.createElement('div');
+          connector.className = 'bracket connector';
+          row.appendChild(connector);
         }
       });
+
+      const right = document.createElement('div');
+      right.className = 'bracket right';
+      row.appendChild(right);
+
+      container.appendChild(row);
     }
   </script>
 </body>
