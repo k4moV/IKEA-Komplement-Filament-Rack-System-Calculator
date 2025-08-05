@@ -49,6 +49,7 @@
 
     .button-wrapper {
       margin-top: 15px;
+      position: relative;
     }
 
     .calculate-button {
@@ -57,6 +58,19 @@
       background-color: #4CAF50;
       color: white;
       border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .language-toggle {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background-color: #2196F3;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      font-size: 0.9em;
       border-radius: 6px;
       cursor: pointer;
     }
@@ -90,12 +104,14 @@
       display: flex;
       width: 100%;
       box-sizing: border-box;
+      position: relative;
     }
 
     .bracket {
       width: 10px;
       height: 20px;
       display: inline-block;
+      border-radius: 0;
     }
 
     .bracket.left, .bracket.right {
@@ -147,45 +163,46 @@
 </head>
 <body>
   <div class="container">
-    <h1>Kalkulator Półek na filamenty z systemu IKEA Komplement</h1>
+    <h1 id="title">Kalkulator Półek na filamenty z systemu IKEA Komplement</h1>
     <div class="calculator">
       <div class="input-section">
-        <label for="rodColor">Kolor drążków:</label>
+        <label for="rodColor" id="labelRodColor">Kolor drążków:</label>
         <select id="rodColor" class="segment-input">
-          <option value="white">Biały</option>
-          <option value="gray">Szary</option>
+          <option value="white" id="optionWhite">Biały</option>
+          <option value="gray" id="optionGray">Szary</option>
         </select>
-        <label>Wybierz swoje segmenty:</label>
-        <label for="seg50">Segmenty z IKEA Komplement 50 cm:</label>
+        <label id="labelSegments">Wybierz swoje segmenty:</label>
+        <label for="seg50" id="labelSeg50">Segmenty z IKEA Komplement 50 cm:</label>
         <input id="seg50" type="number" min="0" value="0" class="segment-input" />
-        <label for="seg75">Segmenty z IKEA Komplement 75 cm:</label>
+        <label for="seg75" id="labelSeg75">Segmenty z IKEA Komplement 75 cm:</label>
         <input id="seg75" type="number" min="0" value="0" class="segment-input" />
-        <label for="seg100">Segmenty z IKEA Komplement 100 cm:</label>
+        <label for="seg100" id="labelSeg100">Segmenty z IKEA Komplement 100 cm:</label>
         <input id="seg100" type="number" min="0" value="0" class="segment-input" />
       </div>
       <div class="output-section">
         <div class="button-wrapper">
-          <button class="calculate-button" onclick="calculate()">Oblicz</button>
+          <button class="calculate-button" onclick="calculate()" id="btnCalculate">Oblicz</button>
+          <button class="language-toggle" onclick="toggleLanguage()" id="btnToggleLang">EN</button>
         </div>
       </div>
     </div>
 
     <div class="results-container">
       <div class="section-box">
-        <div class="section-title">Długość całkowita</div>
+        <div class="section-title" id="lengthTitle">Długość całkowita</div>
         <div id="shelfLength"></div>
       </div>
       <div class="section-box">
-        <div class="section-title">Wizualizacja</div>
+        <div class="section-title" id="visualizationTitle">Wizualizacja</div>
         <div id="visualization" class="visualization"></div>
       </div>
       <div class="output-columns">
         <div class="output-column">
-          <div class="section-title">Wsporniki do wydrukowania</div>
+          <div class="section-title" id="bracketTitle">Wsporniki do wydrukowania</div>
           <div id="bracketCounts" class="bracket-info"></div>
         </div>
         <div class="output-column">
-          <div class="section-title">Zakupy w IKEA</div>
+          <div class="section-title" id="ikeaTitle">Zakupy w IKEA</div>
           <div id="ikeaList"></div>
         </div>
       </div>
@@ -212,95 +229,65 @@
       }
     };
 
-    function calculate() {
-      const rodColor = document.getElementById('rodColor').value;
-      const seg50 = parseInt(document.getElementById('seg50').value) || 0;
-      const seg75 = parseInt(document.getElementById('seg75').value) || 0;
-      const seg100 = parseInt(document.getElementById('seg100').value) || 0;
+    // Language strings, index matches order of your txt
+    const STRINGS = {
+      pl: [
+        'Kalkulator Półek na filamenty z systemu IKEA Komplement',
+        'Kolor drążków:',
+        'Biały',
+        'Szary',
+        'Wybierz swoje segmenty:',
+        'Segmenty z IKEA Komplement 50 cm:',
+        'Segmenty z IKEA Komplement 75 cm:',
+        'Segmenty z IKEA Komplement 100 cm:',
+        'Oblicz',
+        'Długość całkowita',
+        'Wizualizacja',
+        'Wsporniki do wydrukowania',
+        'Zakupy w IKEA',
+        'Wspornik lewy:',
+        'Wspornik prawy:',
+        'Wspornik łączący:',
+        'Wspornik podtrzymujący:'
+      ],
+      en: [
+        'IKEA Komplement Filament Rack System Configurator',
+        'Choose Your clothes rails color:',
+        'White',
+        'Grey',
+        'Pick your singular shelf segments:',
+        'Segments built with IKEA Komplement 50 cm:',
+        'Segments built with IKEA Komplement 75 cm:',
+        'Segments built with IKEA Komplement 100 cm:',
+        'Calculate',
+        'Total length',
+        'Visualization',
+        'Holders to 3Dprint',
+        'IKEA shopping list',
+        'Holder Left:',
+        'Holder Right:',
+        'Holder Connector:',
+        'Holder Middle:'
+      ]
+    };
 
-      const segments = [];
-      for (let i = 0; i < seg50; i++) segments.push(50);
-      for (let i = 0; i < seg75; i++) segments.push(75);
-      for (let i = 0; i < seg100; i++) segments.push(100);
+    let currentLang = 'pl';
 
-      const totalLength = segments.reduce((acc, val) => acc + ROD_LENGTHS[val], 0)
-        + 20 + 20 + (segments.length - 1) * 10;
-
-      const bracketCounts = {
-        left: segments.length > 0 ? 1 : 0,
-        right: segments.length > 0 ? 1 : 0,
-        connector: Math.max(0, segments.length - 1),
-        support: segments.filter(len => len === 75 || len === 100).length
-      };
-
-      const ikeaItems = {
-        '50': seg50 * 2,
-        '75': seg75 * 2,
-        '100': seg100 * 2
-      };
-
-      document.getElementById('shelfLength').innerText = `${totalLength} mm`;
-
-      let bracketHTML = '';
-      if (bracketCounts.left > 0) bracketHTML += `<span class="green">Wspornik lewy: ${bracketCounts.left}</span>`;
-      if (bracketCounts.right > 0) bracketHTML += `<span class="green">Wspornik prawy: ${bracketCounts.right}</span>`;
-      if (bracketCounts.connector > 0) bracketHTML += `<span class="red">Wspornik łączący: ${bracketCounts.connector}</span>`;
-      if (bracketCounts.support > 0) bracketHTML += `<span class="yellow">Wspornik podtrzymujący: ${bracketCounts.support}</span>`;
-      document.getElementById('bracketCounts').innerHTML = bracketHTML;
-
-      let ikeaHTML = '';
-      Object.keys(ikeaItems).forEach(k => {
-        if (ikeaItems[k] > 0) {
-          const code = IKEA_CODES[rodColor][k];
-          const searchUrl = `https://www.google.com/search?q=${code}`;
-          ikeaHTML += `<div>${ikeaItems[k]}x Komplement ${k} cm - <a href="${searchUrl}" target="_blank">${code}</a></div>`;
-        }
-      });
-      document.getElementById('ikeaList').innerHTML = ikeaHTML;
-
-      renderVisualization(segments, rodColor);
+    function setLanguageStrings() {
+      const s = STRINGS[currentLang];
+      document.getElementById('title').innerText = s[0];
+      document.getElementById('labelRodColor').innerText = s[1];
+      document.getElementById('optionWhite').innerText = s[2];
+      document.getElementById('optionGray').innerText = s[3];
+      document.getElementById('labelSegments').innerText = s[4];
+      document.getElementById('labelSeg50').innerText = s[5];
+      document.getElementById('labelSeg75').innerText = s[6];
+      document.getElementById('labelSeg100').innerText = s[7];
+      document.getElementById('btnCalculate').innerText = s[8];
+      document.getElementById('lengthTitle').innerText = s[9];
+      document.getElementById('visualizationTitle').innerText = s[10];
+      document.getElementById('bracketTitle').innerText = s[11];
+      document.getElementById('ikeaTitle').innerText = s[12];
     }
 
-    function renderVisualization(segments, color) {
-      const container = document.getElementById('visualization');
-      container.innerHTML = '';
-      const row = document.createElement('div');
-      row.className = 'shelf-row';
-      row.style.position = 'relative';
-
-      const left = document.createElement('div');
-      left.className = 'bracket left';
-      row.appendChild(left);
-
-      segments.forEach((seg, index) => {
-        const rod = document.createElement('div');
-        rod.className = 'rod';
-        rod.style.backgroundColor = color === 'gray' ? '#666' : '#ccc';
-        const width = ROD_LENGTHS[seg] / 5;
-        rod.style.width = width + 'px';
-
-        if (seg === 75 || seg === 100) {
-          const support = document.createElement('div');
-          support.className = 'bracket support';
-          support.style.left = (width / 2 - 5) + 'px';
-          rod.appendChild(support);
-        }
-
-        row.appendChild(rod);
-
-        if (index < segments.length - 1) {
-          const connector = document.createElement('div');
-          connector.className = 'bracket connector';
-          row.appendChild(connector);
-        }
-      });
-
-      const right = document.createElement('div');
-      right.className = 'bracket right';
-      row.appendChild(right);
-
-      container.appendChild(row);
-    }
-  </script>
-</body>
-</html>
+   
