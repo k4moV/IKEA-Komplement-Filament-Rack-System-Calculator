@@ -104,6 +104,7 @@
       display: flex;
       width: 100%;
       box-sizing: border-box;
+      position: relative;
     }
 
     .bracket {
@@ -179,8 +180,8 @@
       </div>
       <div class="output-section">
         <div class="button-wrapper">
-          <button class="calculate-button" onclick="calculate()" id="calculateBtn">Oblicz</button>
-          <button class="language-toggle" onclick="toggleLanguage()" id="langBtn">EN</button>
+          <button class="calculate-button" id="calculateBtn">Oblicz</button>
+          <button class="language-toggle" id="langBtn">EN</button>
         </div>
       </div>
     </div>
@@ -263,19 +264,92 @@
       document.getElementById('visualTitle').innerText = t.visualTitle;
       document.getElementById('bracketsTitle').innerText = t.bracketsTitle;
       document.getElementById('ikeaTitle').innerText = t.ikeaTitle;
-
-      // Tłumaczenie opcji kolorów
-      const colorOptions = document.getElementById('rodColor').options;
-      if (currentLang === 'pl') {
-        colorOptions[0].text = 'Biały';
-        colorOptions[1].text = 'Szary';
-      } else {
-        colorOptions[0].text = 'White';
-        colorOptions[1].text = 'Grey';
-      }
     }
 
-    // Reszta kodu pozostaje bez zmian...
+    function calculate() {
+      const seg50 = parseInt(document.getElementById('seg50').value) || 0;
+      const seg75 = parseInt(document.getElementById('seg75').value) || 0;
+      const seg100 = parseInt(document.getElementById('seg100').value) || 0;
+      const rodColor = document.getElementById('rodColor').value;
+
+      // Kalkulacje długości
+      const length = seg50 * 50 + seg75 * 75 + seg100 * 100;
+
+      // Wsporniki
+      const leftBrackets = seg50 + seg75 + seg100;
+      const rightBrackets = leftBrackets;
+      const connectorBrackets = Math.max(0, leftBrackets - 1);
+      const supportBrackets = Math.floor(length / 100);
+
+      // Wizualizacja
+      const visualization = document.getElementById('visualization');
+      visualization.innerHTML = '';
+
+      // Tworzymy rzędy półek (każdy segment to "półka")
+      for (let i = 0; i < seg50; i++) {
+        const row = createShelfRow(50, rodColor);
+        visualization.appendChild(row);
+      }
+      for (let i = 0; i < seg75; i++) {
+        const row = createShelfRow(75, rodColor);
+        visualization.appendChild(row);
+      }
+      for (let i = 0; i < seg100; i++) {
+        const row = createShelfRow(100, rodColor);
+        visualization.appendChild(row);
+      }
+
+      document.getElementById('shelfLength').innerText = length + ' cm';
+
+      // Wsporniki do wydrukowania
+      const bracketCounts = document.getElementById('bracketCounts');
+      const t = translations[currentLang];
+      bracketCounts.innerHTML = `
+        <span class="green">${t.left}: ${leftBrackets}</span>
+        <span class="red">${t.connector}: ${connectorBrackets}</span>
+        <span class="green">${t.right}: ${rightBrackets}</span>
+        <span class="yellow">${t.support}: ${supportBrackets}</span>
+      `;
+
+      // Zakupy IKEA
+      const ikeaList = document.getElementById('ikeaList');
+      ikeaList.innerHTML = `
+        <div>${seg50} x KOMPLEMENT 50 cm</div>
+        <div>${seg75} x KOMPLEMENT 75 cm</div>
+        <div>${seg100} x KOMPLEMENT 100 cm</div>
+      `;
+    }
+
+    function createShelfRow(length, rodColor) {
+      const row = document.createElement('div');
+      row.className = 'shelf-row';
+
+      // Lewy wspornik
+      const leftBracket = document.createElement('div');
+      leftBracket.className = 'bracket left';
+      row.appendChild(leftBracket);
+
+      // Drążek
+      const rod = document.createElement('div');
+      rod.className = 'rod';
+      rod.style.width = length + 'cm';
+      rod.style.backgroundColor = rodColor === 'white' ? '#fff' : '#888';
+      rod.style.border = '1px solid #000';
+      row.appendChild(rod);
+
+      // Prawy wspornik
+      const rightBracket = document.createElement('div');
+      rightBracket.className = 'bracket right';
+      row.appendChild(rightBracket);
+
+      return row;
+    }
+
+    // Podpinamy event listener po załadowaniu strony
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('calculateBtn').addEventListener('click', calculate);
+      document.getElementById('langBtn').addEventListener('click', toggleLanguage);
+    });
   </script>
 </body>
 </html>
