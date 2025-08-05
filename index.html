@@ -223,8 +223,10 @@
           <div id="shelfLength"></div>
         </div>
         <div>
-          <div class="section-title">Spool Capacity</div>
-          <div id="spoolCapacity"></div>
+          <div class="section-title">
+  Estimated Spool Capacity (<span id="spoolWidthLabel">68</span> mm)
+</div>
+<div id="spoolCapacity"></div>
         </div>
       </div>
       <div class="section-box">
@@ -438,6 +440,23 @@
 
       container.appendChild(row);
     }*/
+	  document.addEventListener('DOMContentLoaded', () => {
+  const spoolWidthInput = document.getElementById('spoolWidth');
+  const spoolWidthLabel = document.getElementById('spoolWidthLabel');
+
+  function updateSpoolWidthLabel() {
+    const width = parseInt(spoolWidthInput.value, 10);
+    if (!isNaN(width)) {
+      spoolWidthLabel.textContent = width;
+    }
+  }
+
+  // aktualizuj po zmianie inputa
+  spoolWidthInput.addEventListener('input', updateSpoolWidthLabel);
+
+  // zainicjuj przy starcie
+  updateSpoolWidthLabel();
+});
   </script>
 </body>
 </html>
