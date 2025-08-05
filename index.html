@@ -24,6 +24,7 @@
     button {
       margin-top: 20px;
       padding: 10px 20px;
+      cursor: pointer;
     }
 
     pre {
@@ -31,6 +32,7 @@
       padding: 10px;
       border-radius: 5px;
       white-space: pre-wrap;
+      font-weight: 600;
     }
 
     .shelf-visual {
@@ -141,29 +143,62 @@
       border-bottom: 2px solid #ccc;
       padding-bottom: 5px;
     }
+
+    #dimensions {
+      background: #f3f3f3;
+      padding: 12px;
+      border-radius: 5px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      font-weight: 600;
+    }
+
+    /* Język - przyciski */
+    #language-select {
+      margin-bottom: 15px;
+    }
+    #language-select button {
+      margin-right: 10px;
+      padding: 6px 12px;
+      font-weight: 600;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #eee;
+    }
+    #language-select button.active {
+      background-color: #4CAF50;
+      color: white;
+      border-color: #4CAF50;
+    }
   </style>
 </head>
 <body>
-  <h2>Kalkulator Półek na filamenty z systemu IKEA Komplement</h2>
 
-  <p>Wybierz swoje segmenty:</p>
+  <div id="language-select">
+    <button id="btn-pl" class="active">PL</button>
+    <button id="btn-en">EN</button>
+  </div>
 
-  <label>
+  <h2 id="title">Kalkulator Półek na filamenty z systemu IKEA Komplement</h2>
+
+  <p id="desc">Wybierz swoje segmenty:</p>
+
+  <label id="label-50">
     Segmenty z IKEA Komplement 50 cm:
     <input type="number" id="seg50" min="0" value="0" />
   </label>
 
-  <label>
+  <label id="label-75">
     Segmenty z IKEA Komplement 75 cm:
     <input type="number" id="seg75" min="0" value="0" />
   </label>
 
-  <label>
+  <label id="label-100">
     Segmenty z IKEA Komplement 100 cm:
     <input type="number" id="seg100" min="0" value="0" />
   </label>
 
-  <label>
+  <label id="label-color">
     Kolor drążków:
     <select id="pipeColor">
       <option value="bialy">Biały</option>
@@ -171,15 +206,18 @@
     </select>
   </label>
 
-  <button onclick="calculate()">Oblicz</button>
+  <button id="btn-calc">Oblicz</button>
+
+  <!-- Tu pokażemy wymiary i całkowitą długość półki -->
+  <pre id="dimensions"></pre>
 
   <div id="result">
     <div class="result-column">
-      <h3>Wymiary i wsporniki</h3>
+      <h3 id="header-dimensions">Wymiary i wsporniki</h3>
       <pre id="output"></pre>
     </div>
     <div class="result-column">
-      <h3>Zakupy w IKEA</h3>
+      <h3 id="header-shopping">Zakupy w IKEA</h3>
       <pre id="shoppingList"></pre>
     </div>
   </div>
@@ -189,141 +227,227 @@
   <!-- Legenda kolorów -->
   <div id="legend" class="legend">
     <div class="legend-item">
-      <div class="legend-color legend-left"></div> Lewy wspornik zamykający (zielony)
+      <div class="legend-color legend-left"></div> <span id="legend-left">Lewy wspornik zamykający (zielony)</span>
     </div>
     <div class="legend-item">
-      <div class="legend-color legend-right"></div> Prawy wspornik zamykający (zielony)
+      <div class="legend-color legend-right"></div> <span id="legend-right">Prawy wspornik zamykający (zielony)</span>
     </div>
     <div class="legend-item">
-      <div class="legend-color legend-join"></div> Wspornik łączący (czerwony)
+      <div class="legend-color legend-join"></div> <span id="legend-join">Wspornik łączący (czerwony)</span>
     </div>
     <div class="legend-item">
-      <div class="legend-color legend-support"></div> Wspornik podtrzymujący (żółty)
+      <div class="legend-color legend-support"></div> <span id="legend-support">Wspornik podtrzymujący (żółty)</span>
     </div>
   </div>
 
-  <script>
-    function calculate() {
-      const seg50 = parseInt(document.getElementById("seg50").value) || 0;
-      const seg75 = parseInt(document.getElementById("seg75").value) || 0;
-      const seg100 = parseInt(document.getElementById("seg100").value) || 0;
-      const pipeColor = document.getElementById("pipeColor").value;
-
-      const totalSegments = seg50 + seg75 + seg100;
-
-      const segmentLength =
-        seg50 * 450 +
-        seg75 * 700 +
-        seg100 * 950;
-
-      const leftBracket = 1;
-      const rightBracket = 1;
-      const joiningBrackets = Math.max(0, totalSegments - 1);
-      const supportBrackets = seg75 + seg100;
-
-      const extraLength = leftBracket * 20 + rightBracket * 20 + joiningBrackets * 10;
-      const totalShelfLength = segmentLength + extraLength;
-
-      // Wymiary i wsporniki - bez danych wejściowych
-      const result = `
-🔩 Wsporniki:
-- Lewy zamykający: ${leftBracket}
-- Prawy zamykający: ${rightBracket}
-- Łączące: ${joiningBrackets}
-- Podtrzymujące (dla rur 75/100 cm): ${supportBrackets}
-
-📏 Całkowita długość półki (segmenty + wsporniki): ${totalShelfLength} mm
-📏 Czyli: ${(totalShelfLength / 1000).toFixed(2)} m
-      `;
-
-      // Kody artykułów IKEA według koloru i długości
-      const ikeaCodes = {
-        bialy: {
-          50: "902.568.93",
-          75: "402.568.95",
-          100: "302.568.91"
-        },
-        szary: {
-          50: "402.569.42",
-          75: "002.569.44",
-          100: "802.569.40"
-        }
-      };
-
-      // Oblicz ile zestawów trzeba kupić (2 zestawy na segment)
-      const shoppingListLines = [];
-      if (seg50 > 0) {
-        shoppingListLines.push(`50 cm: ${seg50 * 2} zestawów, kod IKEA: ${ikeaCodes[pipeColor][50]}`);
+<script>
+  const texts = {
+    pl: {
+      title: "Kalkulator Półek na filamenty z systemu IKEA Komplement",
+      desc: "Wybierz swoje segmenty:",
+      labels: {
+        seg50: "Segmenty z IKEA Komplement 50 cm:",
+        seg75: "Segmenty z IKEA Komplement 75 cm:",
+        seg100: "Segmenty z IKEA Komplement 100 cm:",
+        pipeColor: "Kolor drążków:",
+        btnCalc: "Oblicz",
+        headerDimensions: "Wymiary i wsporniki",
+        headerShopping: "Zakupy w IKEA",
+        legendLeft: "Lewy wspornik zamykający (zielony)",
+        legendRight: "Prawy wspornik zamykający (zielony)",
+        legendJoin: "Wspornik łączący (czerwony)",
+        legendSupport: "Wspornik podtrzymujący (żółty)",
+        noSegments: "Brak segmentów do zakupu.",
+        dimensionsResult1: "📏 Całkowita długość półki (segmenty + wsporniki):",
+        dimensionsResult2: "📏 Czyli:"
       }
-      if (seg75 > 0) {
-        shoppingListLines.push(`75 cm: ${seg75 * 2} zestawów, kod IKEA: ${ikeaCodes[pipeColor][75]}`);
+    },
+    en: {
+      title: "Shelf Calculator for IKEA Komplement Filament System",
+      desc: "Select your segments:",
+      labels: {
+        seg50: "IKEA Komplement segments 50 cm:",
+        seg75: "IKEA Komplement segments 75 cm:",
+        seg100: "IKEA Komplement segments 100 cm:",
+        pipeColor: "Rod color:",
+        btnCalc: "Calculate",
+        headerDimensions: "Dimensions & Brackets",
+        headerShopping: "IKEA Shopping List",
+        legendLeft: "Left closing bracket (green)",
+        legendRight: "Right closing bracket (green)",
+        legendJoin: "Connecting bracket (red)",
+        legendSupport: "Supporting bracket (yellow)",
+        noSegments: "No segments selected for purchase.",
+        dimensionsResult1: "📏 Total shelf length (segments + brackets):",
+        dimensionsResult2: "📏 Which is:"
       }
-      if (seg100 > 0) {
-        shoppingListLines.push(`100 cm: ${seg100 * 2} zestawów, kod IKEA: ${ikeaCodes[pipeColor][100]}`);
-      }
-      if(shoppingListLines.length === 0){
-        shoppingListLines.push("Brak segmentów do zakupu.");
-      }
-
-      document.getElementById("output").innerText = result;
-      document.getElementById("shoppingList").innerText = shoppingListLines.join("\n");
-
-      // ==== Wizualizacja ====
-      const visual = document.createElement("div");
-      visual.className = "shelf-visual";
-
-      // Lewy wspornik
-      const left = document.createElement("div");
-      left.className = "bracket bracket-left";
-      visual.appendChild(left);
-
-      const addSegment = (size, addSupport) => {
-        const seg = document.createElement("div");
-        seg.className = "segment";
-
-        const pipe1 = document.createElement("div");
-        pipe1.className = "pipe";
-
-        // Kolor rury wg wyboru
-        pipe1.style.backgroundColor = pipeColor === "bialy" ? "#eee" : "#888";
-        pipe1.style.width = size + "px";
-
-        const pipe2 = pipe1.cloneNode(true);
-
-        seg.appendChild(pipe1);
-        seg.appendChild(pipe2);
-
-        if (addSupport) {
-          const support = document.createElement("div");
-          support.className = "support";
-          seg.appendChild(support);
-        }
-
-        visual.appendChild(seg);
-
-        // Wspornik łączący po każdym segmencie poza ostatnim
-        const isLast = ++segmentIndex >= totalSegments;
-        if (!isLast) {
-          const connector = document.createElement("div");
-          connector.className = "bracket bracket-join";
-          visual.appendChild(connector);
-        }
-      };
-
-      let segmentIndex = 0;
-      for (let i = 0; i < seg50; i++) addSegment(50, false);
-      for (let i = 0; i < seg75; i++) addSegment(70, true);
-      for (let i = 0; i < seg100; i++) addSegment(95, true);
-
-      // Prawy wspornik
-      const right = document.createElement("div");
-      right.className = "bracket bracket-right";
-      visual.appendChild(right);
-
-      const shelfContainer = document.getElementById("shelf-container");
-      shelfContainer.innerHTML = ""; // wyczyść starą wizualizację
-      shelfContainer.appendChild(visual);
     }
-  </script>
+  };
+
+  let currentLang = 'pl';
+
+  // Funkcja do zmiany języka tekstów
+  function setLanguage(lang) {
+    currentLang = lang;
+
+    const t = texts[lang];
+
+    document.getElementById("title").textContent = t.title;
+    document.getElementById("desc").textContent = t.desc;
+    document.getElementById("label-50").childNodes[0].textContent = t.labels.seg50;
+    document.getElementById("label-75").childNodes[0].textContent = t.labels.seg75;
+    document.getElementById("label-100").childNodes[0].textContent = t.labels.seg100;
+    document.getElementById("label-color").childNodes[0].textContent = t.labels.pipeColor;
+    document.getElementById("btn-calc").textContent = t.labels.btnCalc;
+    document.getElementById("header-dimensions").textContent = t.labels.headerDimensions;
+    document.getElementById("header-shopping").textContent = t.labels.headerShopping;
+    document.getElementById("legend-left").textContent = t.labels.legendLeft;
+    document.getElementById("legend-right").textContent = t.labels.legendRight;
+    document.getElementById("legend-join").textContent = t.labels.legendJoin;
+    document.getElementById("legend-support").textContent = t.labels.legendSupport;
+
+    // Wyczyść wyniki po zmianie języka
+    document.getElementById("dimensions").textContent = "";
+    document.getElementById("output").textContent = "";
+    document.getElementById("shoppingList").textContent = "";
+    document.getElementById("shelf-container").innerHTML = "";
+  }
+
+  document.getElementById("btn-pl").addEventListener("click", () => {
+    document.getElementById("btn-pl").classList.add("active");
+    document.getElementById("btn-en").classList.remove("active");
+    setLanguage("pl");
+  });
+
+  document.getElementById("btn-en").addEventListener("click", () => {
+    document.getElementById("btn-en").classList.add("active");
+    document.getElementById("btn-pl").classList.remove("active");
+    setLanguage("en");
+  });
+
+  document.getElementById("btn-calc").addEventListener("click", calculate);
+
+  function calculate() {
+    const seg50 = parseInt(document.getElementById("seg50").value) || 0;
+    const seg75 = parseInt(document.getElementById("seg75").value) || 0;
+    const seg100 = parseInt(document.getElementById("seg100").value) || 0;
+    const pipeColor = document.getElementById("pipeColor").value;
+
+    const totalSegments = seg50 + seg75 + seg100;
+
+    const segmentLength =
+      seg50 * 450 +
+      seg75 * 700 +
+      seg100 * 950;
+
+    const leftBracket = 1;
+    const rightBracket = 1;
+    const joiningBrackets = Math.max(0, totalSegments - 1);
+    const supportBrackets = seg75 + seg100;
+
+    const extraLength = leftBracket * 20 + rightBracket * 20 + joiningBrackets * 10;
+    const totalShelfLength = segmentLength + extraLength;
+
+    const t = texts[currentLang].labels;
+
+    // Całkowita długość i wymiary nad wizualizacją
+    const dimensionsText = `
+${t.dimensionsResult1} ${totalShelfLength} mm
+${t.dimensionsResult2} ${(totalShelfLength / 1000).toFixed(2)} m
+    `;
+    document.getElementById("dimensions").innerText = dimensionsText.trim();
+
+    // Wsporniki w lewej kolumnie
+    let outputText = "";
+    outputText += `• ${t.legendLeft}\n`;
+    outputText += `• ${t.legendRight}\n`;
+    if (joiningBrackets > 0) outputText += `• ${joiningBrackets} × ${t.legendJoin}\n`;
+    if (supportBrackets > 0) outputText += `• ${supportBrackets} × ${t.legendSupport}\n`;
+
+    document.getElementById("output").innerText = outputText.trim();
+
+    // Lista zakupów w IKEA
+    let shoppingList = "";
+
+    if (totalSegments === 0) {
+      shoppingList = t.noSegments;
+    } else {
+      if (seg50 > 0) shoppingList += `• ${seg50} × IKEA KOMPLEMENT 50 cm\n`;
+      if (seg75 > 0) shoppingList += `• ${seg75} × IKEA KOMPLEMENT 75 cm\n`;
+      if (seg100 > 0) shoppingList += `• ${seg100} × IKEA KOMPLEMENT 100 cm\n`;
+
+      shoppingList += `\n• 1 × Left bracket (green)\n• 1 × Right bracket (green)`;
+      if (joiningBrackets > 0)
+        shoppingList += `\n• ${joiningBrackets} × Connecting bracket (red)`;
+      if (supportBrackets > 0)
+        shoppingList += `\n• ${supportBrackets} × Supporting bracket (yellow)`;
+
+      shoppingList += `\n\n• Rod color: ${pipeColor === "bialy" ? (currentLang === "pl" ? "Biały" : "White") : (currentLang === "pl" ? "Szary" : "Gray")}`;
+    }
+
+    document.getElementById("shoppingList").innerText = shoppingList;
+
+    drawShelf(seg50, seg75, seg100);
+  }
+
+  // Rysowanie półki wizualnej
+  function drawShelf(seg50, seg75, seg100) {
+    const container = document.getElementById("shelf-container");
+    container.innerHTML = "";
+
+    const totalSegments = seg50 + seg75 + seg100;
+    if (totalSegments === 0) return;
+
+    const segments = [];
+
+    for (let i = 0; i < seg50; i++) segments.push(450);
+    for (let i = 0; i < seg75; i++) segments.push(700);
+    for (let i = 0; i < seg100; i++) segments.push(950);
+
+    // Lewy wspornik
+    const leftBracket = document.createElement("div");
+    leftBracket.className = "bracket bracket-left";
+    container.appendChild(leftBracket);
+
+    for (let i = 0; i < segments.length; i++) {
+      // Rurka segmentu
+      const segmentDiv = document.createElement("div");
+      segmentDiv.className = "segment";
+
+      const pipe = document.createElement("div");
+      pipe.className = "pipe";
+      pipe.style.width = (segments[i] / 10) + "px"; // Skalowanie
+      pipe.style.backgroundColor = (document.getElementById("pipeColor").value === "bialy") ? "#eee" : "#888";
+
+      segmentDiv.appendChild(pipe);
+
+      // Wspornik podtrzymujący (jeśli 75 lub 100 cm)
+      if (segments[i] >= 700) {
+        const support = document.createElement("div");
+        support.className = "support";
+        segmentDiv.appendChild(support);
+      }
+
+      container.appendChild(segmentDiv);
+
+      // Wspornik łączący, jeśli nie ostatni segment
+      if (i < segments.length - 1) {
+        const joinBracket = document.createElement("div");
+        joinBracket.className = "bracket bracket-join";
+        container.appendChild(joinBracket);
+      }
+    }
+
+    // Prawy wspornik
+    const rightBracket = document.createElement("div");
+    rightBracket.className = "bracket bracket-right";
+    container.appendChild(rightBracket);
+  }
+
+  // Start z domyślnym językiem PL
+  setLanguage("pl");
+
+</script>
+
 </body>
 </html>
