@@ -36,6 +36,13 @@
   flex: 1 1 300px;
 }
 
+  .input-section label,
+.input-section select,
+.input-section input {
+  display: block;
+  margin-bottom: 12px; /* odstęp między polami */
+}
+
 /* osobno dla .output-section dodaj: */
 .output-section {
   display: flex;
@@ -170,11 +177,6 @@
     <h1><a href="https://www.printables.com/model/1373893" target="_blank">https://www.printables.com/model/1373893</a></h1>
     <div class="calculator">
       <div class="input-section">
-        <label for="rodColor">Rod Color:</label>
-        <select id="rodColor" class="segment-input">
-          <option value="white">White</option>
-          <option value="gray">Gray</option>
-        </select>
         <label>Select your segments:</label>
         <label for="seg50">Segments build from IKEA Komplement 50 cm:</label>
         <input id="seg50" type="number" min="0" value="0" class="segment-input" />
@@ -184,6 +186,11 @@
         <input id="seg100" type="number" min="0" value="0" class="segment-input" />
         <label for="spoolWidth">Spool width (mm):</label>
         <input id="spoolWidth" type="number" min="1" value="68" class="segment-input" />
+        <label for="rodColor">Select IKEA Komplement Rails Color:</label>
+        <select id="rodColor" class="segment-input">
+          <option value="white">White</option>
+          <option value="gray">Gray</option>
+        </select>
       </div>
       <div class="output-section">
         <div class="button-wrapper">
