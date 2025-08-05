@@ -2,228 +2,215 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kalkulator Półek na filamenty z systemu IKEA Komplement</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
+      padding: 20px;
+      background-color: #f2f2f2;
     }
-    h1 {
-      margin-bottom: 10px;
+    h1, h2 {
+      margin-top: 0;
     }
-    label, select, input {
-      display: block;
-      margin: 10px 0;
+    .section {
+      background-color: #ffffff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
-    .row {
+    .flex {
       display: flex;
-      gap: 40px;
+      gap: 20px;
     }
     .column {
       flex: 1;
     }
-    #shelf-container {
-      display: flex;
-      align-items: center;
-      margin-top: 20px;
-      flex-wrap: wrap;
+    .input-group {
+      margin-bottom: 10px;
     }
-    .bracket {
-      width: 10px;
-      height: 40px;
-      margin: 0 2px;
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    #visualization {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 10px;
+      gap: 4px;
+    }
+    .bar {
+      height: 20px;
+      display: inline-block;
+      position: relative;
+    }
+    .rod-white {
+      background-color: #ccc;
+    }
+    .rod-gray {
+      background-color: #888;
     }
     .bracket-left, .bracket-right {
       background-color: green;
+      width: 20px;
     }
-    .bracket-join {
+    .bracket-joining {
       background-color: red;
+      width: 10px;
     }
-    .support {
-      width: 6px;
-      height: 30px;
+    .bracket-supporting {
       background-color: yellow;
-      margin-left: 4px;
+      width: 10px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 0;
+      bottom: 0;
     }
-    .pipe {
-      height: 10px;
-      display: inline-block;
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
     }
-    .segment {
-      display: flex;
-      align-items: center;
+    ul li {
+      margin: 5px 0;
     }
-    .legend {
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    .output-box {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-top: 10px;
-      background-color: #f9f9f9;
-    }
+    .green { color: green; }
+    .red { color: red; }
+    .yellow { color: goldenrod; }
   </style>
 </head>
 <body>
+  <h1>Kalkulator Półek na filamenty z systemu IKEA Komplement</h1>
 
-<h1>Kalkulator Półek na filamenty z systemu IKEA Komplement</h1>
-
-<label for="seg50">Segmenty z IKEA Komplement 50 cm:</label>
-<input type="number" id="seg50" value="0" min="0">
-
-<label for="seg75">Segmenty z IKEA Komplement 75 cm:</label>
-<input type="number" id="seg75" value="0" min="0">
-
-<label for="seg100">Segmenty z IKEA Komplement 100 cm:</label>
-<input type="number" id="seg100" value="0" min="0">
-
-<label for="pipeColor">Kolor drążków:</label>
-<select id="pipeColor">
-  <option value="bialy">Biały</option>
-  <option value="szary">Szary</option>
-</select>
-
-<button onclick="calculate()">Oblicz</button>
-
-<div class="output-box">
-  <h3>Długość</h3>
-  <p id="dimensions"></p>
-</div>
-
-<div class="row">
-  <div class="column">
-    <h3>Wymiary i wsporniki</h3>
-    <pre id="output"></pre>
+  <div class="section flex">
+    <div class="column">
+      <h2>Wybierz swoje segmenty</h2>
+      <div class="input-group">
+        <label for="seg50">Segmenty z IKEA Komplement 50 cm:</label>
+        <input type="number" id="seg50" value="0" min="0">
+      </div>
+      <div class="input-group">
+        <label for="seg75">Segmenty z IKEA Komplement 75 cm:</label>
+        <input type="number" id="seg75" value="0" min="0">
+      </div>
+      <div class="input-group">
+        <label for="seg100">Segmenty z IKEA Komplement 100 cm:</label>
+        <input type="number" id="seg100" value="0" min="0">
+      </div>
+      <div class="input-group">
+        <label for="color">Kolor drążków:</label>
+        <select id="color">
+          <option value="white">Biały</option>
+          <option value="gray">Szary</option>
+        </select>
+      </div>
+    </div>
+    <div class="column" style="display: flex; align-items: center;">
+      <button onclick="calculate()">Oblicz</button>
+    </div>
   </div>
-  <div class="column">
-    <h3>Zakupy w IKEA</h3>
-    <pre id="shoppingList"></pre>
+
+  <div class="section">
+    <h2 id="length-title">Długość całkowita</h2>
+    <p id="dimensions">—</p>
   </div>
-</div>
 
-<div id="shelf-container"></div>
+  <div class="section">
+    <div id="visualization"></div>
+  </div>
 
-<div class="legend">
-  <strong>Legenda:</strong><br>
-  <span style="color: green;">Zielony</span> - wspornik lewy/prawy<br>
-  <span style="color: red;">Czerwony</span> - wspornik łączący<br>
-  <span style="color: yellow;">Złoty</span> - wspornik podtrzymujący (dla 75 i 100 cm)
-</div>
+  <div class="section flex">
+    <div class="column">
+      <h2>Wymiary i wsporniki</h2>
+      <ul id="brackets"></ul>
+    </div>
+    <div class="column">
+      <h2>Zakupy w IKEA</h2>
+      <ul id="ikea-list"></ul>
+    </div>
+  </div>
 
-<script>
-function calculate() {
-  const seg50 = parseInt(document.getElementById("seg50").value) || 0;
-  const seg75 = parseInt(document.getElementById("seg75").value) || 0;
-  const seg100 = parseInt(document.getElementById("seg100").value) || 0;
-  const color = document.getElementById("pipeColor").value;
+  <script>
+    function calculate() {
+      const seg50 = parseInt(document.getElementById('seg50').value) || 0;
+      const seg75 = parseInt(document.getElementById('seg75').value) || 0;
+      const seg100 = parseInt(document.getElementById('seg100').value) || 0;
+      const color = document.getElementById('color').value;
 
-  const segmentLengths = {
-    50: 45,
-    75: 70,
-    100: 95
-  };
+      const segmentLengths = { 50: 45, 75: 70, 100: 95 };
+      const totalSegments = seg50 + seg75 + seg100;
+      const totalPipeLength = seg50 * segmentLengths[50] + seg75 * segmentLengths[75] + seg100 * segmentLengths[100];
+      const totalLength = totalPipeLength + 2 + (totalSegments > 1 ? (totalSegments - 1) * 1 : 0);
 
-  const bracketLeftRight = 2;
-  const bracketJoining = 1;
+      document.getElementById("dimensions").innerText = totalLength + " cm";
 
-  const totalSegments = seg50 + seg75 + seg100;
-
-  const totalPipeLength = seg50 * segmentLengths[50] +
-                          seg75 * segmentLengths[75] +
-                          seg100 * segmentLengths[100];
-
-  const totalLength = totalPipeLength + bracketLeftRight * 2 +
-    (totalSegments > 1 ? (totalSegments - 1) * bracketJoining : 0);
-
-  document.getElementById("dimensions").innerText = `${totalLength} cm`;
-
-  const leftRightBrackets = totalSegments > 0 ? 2 : 0;
-  const joinBrackets = totalSegments > 1 ? (totalSegments - 1) : 0;
-  const supportBrackets = seg75 + seg100;
-
-  let output = "";
-  if (leftRightBrackets > 0) {
-    output += `• 1 × Wspornik lewy (zielony)\n`;
-    output += `• 1 × Wspornik prawy (zielony)\n`;
-  }
-  if (joinBrackets > 0) output += `• ${joinBrackets} × Wspornik łączący (czerwony)\n`;
-  if (supportBrackets > 0) output += `• ${supportBrackets} × Wspornik podtrzymujący (żółty)`;
-
-  document.getElementById("output").innerText = output.trim();
-
-  let shoppingList = "";
-  if (totalSegments === 0) {
-    shoppingList = "Brak segmentów.";
-  } else {
-    const kod = {
-      bialy: {
-        50: "902.568.93",
-        75: "402.568.95",
-        100: "302.568.91"
-      },
-      szary: {
-        50: "402.569.42",
-        75: "002.569.44",
-        100: "802.569.40"
+      const bracketList = [];
+      if (totalSegments > 0) {
+        bracketList.push('<span class="green">Wspornik lewy (zielony)</span>: 1');
+        bracketList.push('<span class="green">Wspornik prawy (zielony)</span>: 1');
+        if (totalSegments > 1) {
+          bracketList.push('<span class="red">Wspornik łączący (czerwony)</span>: ' + (totalSegments - 1));
+        }
       }
-    };
-    if (seg50 > 0) shoppingList += `• ${seg50 * 2} × KOMPLEMENT 50 cm — ${kod[color][50]}\n`;
-    if (seg75 > 0) shoppingList += `• ${seg75 * 2} × KOMPLEMENT 75 cm — ${kod[color][75]}\n`;
-    if (seg100 > 0) shoppingList += `• ${seg100 * 2} × KOMPLEMENT 100 cm — ${kod[color][100]}\n`;
-  }
-  document.getElementById("shoppingList").innerText = shoppingList.trim();
+      const supportingCount = (seg75 > 0 ? seg75 : 0) + (seg100 > 0 ? seg100 : 0);
+      if (supportingCount > 0) {
+        bracketList.push('<span class="yellow">Wspornik podtrzymujący (żółty)</span>: ' + supportingCount);
+      }
+      document.getElementById("brackets").innerHTML = bracketList.map(item => `<li>${item}</li>`).join('');
 
-  drawShelf(seg50, seg75, seg100, color);
-}
+      const ikeaItems = [];
+      const rodCodes = {
+        white: { 50: '902.568.93', 75: '402.568.95', 100: '302.568.91' },
+        gray: { 50: '402.569.42', 75: '002.569.44', 100: '802.569.40' }
+      };
+      if (seg50 > 0) ikeaItems.push(`Drążki ${color === 'white' ? 'białe' : 'szare'} 50 cm x ${seg50 * 2} — ${rodCodes[color][50]}`);
+      if (seg75 > 0) ikeaItems.push(`Drążki ${color === 'white' ? 'białe' : 'szare'} 75 cm x ${seg75 * 2} — ${rodCodes[color][75]}`);
+      if (seg100 > 0) ikeaItems.push(`Drążki ${color === 'white' ? 'białe' : 'szare'} 100 cm x ${seg100 * 2} — ${rodCodes[color][100]}`);
+      document.getElementById("ikea-list").innerHTML = ikeaItems.map(item => `<li>${item}</li>`).join('');
 
-function drawShelf(seg50, seg75, seg100, color) {
-  const container = document.getElementById("shelf-container");
-  container.innerHTML = "";
-
-  const segments = [];
-  for (let i = 0; i < seg50; i++) segments.push(45);
-  for (let i = 0; i < seg75; i++) segments.push(70);
-  for (let i = 0; i < seg100; i++) segments.push(95);
-
-  if (segments.length === 0) return;
-
-  const pipeColor = color === "bialy" ? "#eee" : "#888";
-
-  const leftBracket = document.createElement("div");
-  leftBracket.className = "bracket bracket-left";
-  container.appendChild(leftBracket);
-
-  segments.forEach((length, index) => {
-    const segmentDiv = document.createElement("div");
-    segmentDiv.className = "segment";
-
-    const pipe = document.createElement("div");
-    pipe.className = "pipe";
-    pipe.style.width = (length * 2) + "px"; // Skala wizualizacji
-    pipe.style.backgroundColor = pipeColor;
-    segmentDiv.appendChild(pipe);
-
-    if (length >= 70) {
-      const support = document.createElement("div");
-      support.className = "support";
-      segmentDiv.appendChild(support);
+      drawVisualization(seg50, seg75, seg100, color);
     }
 
-    container.appendChild(segmentDiv);
+    function drawVisualization(seg50, seg75, seg100, color) {
+      const visualization = document.getElementById("visualization");
+      visualization.innerHTML = "";
 
-    if (index < segments.length - 1) {
-      const join = document.createElement("div");
-      join.className = "bracket bracket-join";
-      container.appendChild(join);
+      const segments = [
+        ...Array(seg50).fill(50),
+        ...Array(seg75).fill(75),
+        ...Array(seg100).fill(100)
+      ];
+
+      if (segments.length === 0) return;
+
+      visualization.innerHTML += '<div class="bar bracket-left"></div>';
+
+      segments.forEach((length, index) => {
+        const rodLength = { 50: 45, 75: 70, 100: 95 }[length];
+        const bar = document.createElement("div");
+        bar.className = `bar rod-${color}`;
+        bar.style.width = rodLength * 4 + "px"; // scale for display
+
+        if (length === 75 || length === 100) {
+          const support = document.createElement("div");
+          support.className = "bracket-supporting";
+          bar.appendChild(support);
+        }
+
+        visualization.appendChild(bar);
+
+        if (index < segments.length - 1) {
+          const join = document.createElement("div");
+          join.className = "bar bracket-joining";
+          visualization.appendChild(join);
+        }
+      });
+
+      visualization.innerHTML += '<div class="bar bracket-right"></div>';
     }
-  });
-
-  const rightBracket = document.createElement("div");
-  rightBracket.className = "bracket bracket-right";
-  container.appendChild(rightBracket);
-}
-</script>
-
+  </script>
 </body>
 </html>
