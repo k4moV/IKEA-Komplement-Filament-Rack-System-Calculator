@@ -47,13 +47,6 @@
   const extraLength = leftBracket * 20 + rightBracket * 20 + joiningBrackets * 10;
   const totalShelfLength = segmentLength + extraLength;
 
-  // Rury – 2 na segment
-  const pipes50 = seg50 * 2;
-  const pipes75 = seg75 * 2;
-  const pipes100 = seg100 * 2;
-
-  const totalPipeLength = pipes50 * 450 + pipes75 * 700 + pipes100 * 950;
-
   const result = `
 📦 Dane wejściowe:
 - Segmenty 50 cm: ${seg50}
@@ -67,18 +60,13 @@
 - Łączące: ${joiningBrackets}
 - Podtrzymujące (dla rur 75/100 cm): ${supportBrackets}
 
-🧰 Rury:
-- 450 mm: ${pipes50} szt.
-- 700 mm: ${pipes75} szt.
-- 950 mm: ${pipes100} szt.
-- Łączna długość rur: ${totalPipeLength} mm
-
 📏 Całkowita długość półki (segmenty + wsporniki): ${totalShelfLength} mm
 📏 Czyli: ${(totalShelfLength / 1000).toFixed(2)} m
   `;
 
   document.getElementById("output").innerText = result;
 }
+
   </script>
 </body>
 </html>
