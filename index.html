@@ -299,16 +299,16 @@
       const pipeColor = pipeColorSelect.value;
 
       // Wymiary rur segmentów
-      const segmentLengths = {
-        50: 45,
-        75: 70,
-        100: 95
-      };
+     const segmentLengths = {
+  50: 45,
+  75: 70,
+  100: 95
+};
 
-      // Wsporniki - w cm
-      const bracketLeftRight = 2; // szerokość wspornika lewego/prawego
-      const bracketJoining = 1; // szerokość wspornika łączącego
-      const bracketSupport75_100 = 0; // wspornik podtrzymujący dla 75 i 100
+const bracketLeftRight = 2;       // każdy po 2 cm
+const bracketJoining = 1;         // każdy 1 cm
+const bracketSupport75_100 = 0;   // nie wpływa na długość
+
 
       // Lista segmentów do ułożenia (kolejność: 50,75,100)
       const segments = [];
