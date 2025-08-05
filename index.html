@@ -251,7 +251,9 @@
       let ikeaHTML = '';
       Object.keys(ikeaItems).forEach(k => {
         if (ikeaItems[k] > 0) {
-          ikeaHTML += `<div>${ikeaItems[k]}x Komplement ${k} cm (${IKEA_CODES[rodColor][k]})</div>`;
+          const code = IKEA_CODES[rodColor][k];
+          const searchUrl = `https://www.google.com/search?q=${code}`;
+          ikeaHTML += `<div>${ikeaItems[k]}x Komplement ${k} cm - <a href="${searchUrl}" target="_blank">${code}</a></div>`;
         }
       });
       document.getElementById('ikeaList').innerHTML = ikeaHTML;
