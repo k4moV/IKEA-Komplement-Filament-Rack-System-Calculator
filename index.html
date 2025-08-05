@@ -244,10 +244,10 @@
       document.getElementById('shelfLength').innerText = `${totalLength} mm`;
 
       let bracketHTML = '';
-      if (bracketCounts.left > 0) bracketHTML += `<span class="green">Left bracket: ${bracketCounts.left}</span>`;
-      if (bracketCounts.right > 0) bracketHTML += `<span class="green">Right bracket: ${bracketCounts.right}</span>`;
-      if (bracketCounts.connector > 0) bracketHTML += `<span class="red">Connector bracket: ${bracketCounts.connector}</span>`;
-      if (bracketCounts.support > 0) bracketHTML += `<span class="yellow">Supporting bracket: ${bracketCounts.support}</span>`;
+      if (bracketCounts.left > 0) bracketHTML += `<span class="green">Holder LEFT: ${bracketCounts.left}</span>`;
+      if (bracketCounts.right > 0) bracketHTML += `<span class="green">Holder RIGHT: ${bracketCounts.right}</span>`;
+      if (bracketCounts.connector > 0) bracketHTML += `<span class="red">Holder CONNECTOR: ${bracketCounts.connector}</span>`;
+      if (bracketCounts.support > 0) bracketHTML += `<span class="yellow">Holder MIDDLE: ${bracketCounts.support}</span>`;
       document.getElementById('bracketCounts').innerHTML = bracketHTML;
 
       let ikeaHTML = '';
