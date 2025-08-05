@@ -112,13 +112,20 @@
       background-color: red;
     }
 
-    .bracket.support {
+   /* .bracket.support {
       background-color: yellow;
       width: 10px;
       height: 20px;
       position: absolute;
       top: 0;
-    }
+    }*/
+
+	.bracket.support {
+ 	 background-color: yellow;
+ 	 width: 10px;
+ 	 height: 20px;
+ 	 display: inline-block;
+	}
 
     .rod {
       height: 20px;
@@ -326,7 +333,71 @@
       renderVisualization(segments, rodColor);
     }
 
-    function renderVisualization(segments, color) {
+  function renderVisualization(segments, color) {
+  const container = document.getElementById('visualization');
+  container.innerHTML = '';
+  const row = document.createElement('div');
+  row.className = 'shelf-row';
+
+  const left = document.createElement('div');
+  left.className = 'bracket left';
+  row.appendChild(left);
+
+  segments.forEach((seg, index) => {
+    const rodColor = color === 'gray' ? '#666' : '#ccc';
+
+    if (seg === 75 || seg === 100) {
+      const totalWidth = ROD_LENGTHS[seg] / 5;
+      const halfWidth = (totalWidth - 10) / 2;
+
+      // Left half
+      const leftRod = document.createElement('div');
+      leftRod.className = 'rod';
+      leftRod.style.backgroundColor = rodColor;
+      leftRod.style.width = halfWidth + 'px';
+      row.appendChild(leftRod);
+
+      // Yellow support bracket
+      const support = document.createElement('div');
+      support.className = 'bracket support';
+      support.style.left = '0px';
+      row.appendChild(support);
+
+      // Right half
+      const rightRod = document.createElement('div');
+      rightRod.className = 'rod';
+      rightRod.style.backgroundColor = rodColor;
+      rightRod.style.width = halfWidth + 'px';
+      row.appendChild(rightRod);
+    } else {
+      // Single full rod
+      const rod = document.createElement('div');
+      rod.className = 'rod';
+      rod.style.backgroundColor = rodColor;
+      rod.style.width = ROD_LENGTHS[seg] / 5 + 'px';
+      row.appendChild(rod);
+    }
+
+    if (index < segments.length - 1) {
+      const connector = document.createElement('div');
+      connector.className = 'bracket connector';
+      row.appendChild(connector);
+    }
+  });
+
+  const right = document.createElement('div');
+  right.className = 'bracket right';
+  row.appendChild(right);
+
+  container.appendChild(row);
+}
+	  
+	  
+	  
+	  
+	  
+	  
+	/* function renderVisualization(segments, color) {
       const container = document.getElementById('visualization');
       container.innerHTML = '';
       const row = document.createElement('div');
@@ -364,7 +435,7 @@
       row.appendChild(right);
 
       container.appendChild(row);
-    }
+    }*/
   </script>
 </body>
 </html>
