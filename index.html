@@ -347,7 +347,8 @@
         if (seg === 75 || seg === 100) {
           const support = document.createElement('div');
           support.className = 'bracket support';
-          support.style.left = (width / 2 - 5) + 'px';
+          support.style.left = '50%';
+          support.style.transform = 'translateX(-50%)';
           rod.appendChild(support);
         }
 
