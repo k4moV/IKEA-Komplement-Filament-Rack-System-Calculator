@@ -25,41 +25,36 @@
 
   <script>
     function calculate() {
-      const seg50 = parseInt(document.getElementById("seg50").value) || 0;
-      const seg75 = parseInt(document.getElementById("seg75").value) || 0;
-      const seg100 = parseInt(document.getElementById("seg100").value) || 0;
+  const seg50 = parseInt(document.getElementById("seg50").value) || 0;
+  const seg75 = parseInt(document.getElementById("seg75").value) || 0;
+  const seg100 = parseInt(document.getElementById("seg100").value) || 0;
 
-      const totalSegments = seg50 + seg75 + seg100;
+  const totalSegments = seg50 + seg75 + seg100;
 
-      // Rury
-      const pipeLengths = {
-        "50": 450,
-        "75": 700,
-        "100": 950
-      };
+  // Długości segmentów (rur)
+  const segmentLength =
+    seg50 * 450 +
+    seg75 * 700 +
+    seg100 * 950;
 
-      const pipes50 = seg50 * 2;
-      const pipes75 = seg75 * 2;
-      const pipes100 = seg100 * 2;
+  // Wsporniki
+  const leftBracket = 1;
+  const rightBracket = 1;
+  const joiningBrackets = Math.max(0, totalSegments - 1);
+  const supportBrackets = seg75 + seg100; // tylko dla dłuższych rur
 
-      const totalPipeLength =
-        pipes50 * pipeLengths["50"] +
-        pipes75 * pipeLengths["75"] +
-        pipes100 * pipeLengths["100"];
+  // Długość półki = suma długości segmentów + wsporniki boczne + łączące
+  const extraLength = leftBracket * 20 + rightBracket * 20 + joiningBrackets * 10;
+  const totalShelfLength = segmentLength + extraLength;
 
-      // Wsporniki
-      const leftBracket = 1;
-      const rightBracket = 1;
-      const joiningBrackets = Math.max(0, totalSegments - 1);
-      const supportBrackets = seg75 + seg100;
+  // Rury – 2 na segment
+  const pipes50 = seg50 * 2;
+  const pipes75 = seg75 * 2;
+  const pipes100 = seg100 * 2;
 
-      // Dodatkowa długość od wsporników
-      const extraLength =
-        (leftBracket + rightBracket) * 20 + joiningBrackets * 10;
+  const totalPipeLength = pipes50 * 450 + pipes75 * 700 + pipes100 * 950;
 
-      const totalShelfLength = totalPipeLength + extraLength;
-
-      const result = `
+  const result = `
 📦 Dane wejściowe:
 - Segmenty 50 cm: ${seg50}
 - Segmenty 75 cm: ${seg75}
@@ -78,13 +73,12 @@
 - 950 mm: ${pipes100} szt.
 - Łączna długość rur: ${totalPipeLength} mm
 
-➕ Dodatkowa długość od wsporników: ${extraLength} mm
+📏 Całkowita długość półki (segmenty + wsporniki): ${totalShelfLength} mm
+📏 Czyli: ${(totalShelfLength / 1000).toFixed(2)} m
+  `;
 
-📏 Całkowita długość półki: ${totalShelfLength} mm (${(totalShelfLength / 1000).toFixed(2)} m)
-      `;
-
-      document.getElementById("output").innerText = result;
-    }
+  document.getElementById("output").innerText = result;
+}
   </script>
 </body>
 </html>
