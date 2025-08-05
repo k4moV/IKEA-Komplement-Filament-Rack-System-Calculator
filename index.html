@@ -3,51 +3,130 @@
 <head>
   <meta charset="UTF-8">
   <title>Kalkulator półki na filamenty</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input {
+      width: 60px;
+      margin-left: 10px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+    }
+
+    pre {
+      background: #f3f3f3;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .shelf-visual {
+      display: flex;
+      align-items: center;
+      margin-top: 20px;
+      overflow-x: auto;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #fafafa;
+    }
+
+    .segment {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0 2px;
+    }
+
+    .pipe {
+      width: 50px;
+      height: 6px;
+      background: #555;
+      margin: 2px 0;
+      border-radius: 3px;
+    }
+
+    .bracket {
+      width: 10px;
+      height: 30px;
+      background: #aaa;
+      margin: 0 2px;
+    }
+
+    .support {
+      width: 8px;
+      height: 15px;
+      background: orange;
+      margin-top: 4px;
+      border-radius: 2px;
+    }
+
+    #shelf-container {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
   <h2>Kalkulator półki na filamenty</h2>
 
   <p>Podaj liczbę segmentów dla każdej długości rury:</p>
 
-  <label for="seg50">Segmenty 50 cm (450 mm):</label>
-  <input type="number" id="seg50" min="0" value="0"><br><br>
+  <label>
+    Segmenty 50 cm (450 mm):
+    <input type="number" id="seg50" min="0" value="0">
+  </label>
 
-  <label for="seg75">Segmenty 75 cm (700 mm):</label>
-  <input type="number" id="seg75" min="0" value="0"><br><br>
+  <label>
+    Segmenty 75 cm (700 mm):
+    <input type="number" id="seg75" min="0" value="0">
+  </label>
 
-  <label for="seg100">Segmenty 100 cm (950 mm):</label>
-  <input type="number" id="seg100" min="0" value="0"><br><br>
+  <label>
+    Segmenty 100 cm (950 mm):
+    <input type="number" id="seg100" min="0" value="0">
+  </label>
 
   <button onclick="calculate()">Oblicz</button>
 
   <h3>Wynik:</h3>
   <pre id="output"></pre>
 
+  <div id="shelf-container"></div>
+
   <script>
     function calculate() {
-  const seg50 = parseInt(document.getElementById("seg50").value) || 0;
-  const seg75 = parseInt(document.getElementById("seg75").value) || 0;
-  const seg100 = parseInt(document.getElementById("seg100").value) || 0;
+      const seg50 = parseInt(document.getElementById("seg50").value) || 0;
+      const seg75 = parseInt(document.getElementById("seg75").value) || 0;
+      const seg100 = parseInt(document.getElementById("seg100").value) || 0;
 
-  const totalSegments = seg50 + seg75 + seg100;
+      const totalSegments = seg50 + seg75 + seg100;
 
-  // Długości segmentów (rur)
-  const segmentLength =
-    seg50 * 450 +
-    seg75 * 700 +
-    seg100 * 950;
+      const segmentLength =
+        seg50 * 450 +
+        seg75 * 700 +
+        seg100 * 950;
 
-  // Wsporniki
-  const leftBracket = 1;
-  const rightBracket = 1;
-  const joiningBrackets = Math.max(0, totalSegments - 1);
-  const supportBrackets = seg75 + seg100; // tylko dla dłuższych rur
+      const leftBracket = 1;
+      const rightBracket = 1;
+      const joiningBrackets = Math.max(0, totalSegments - 1);
+      const supportBrackets = seg75 + seg100;
 
-  // Długość półki = suma długości segmentów + wsporniki boczne + łączące
-  const extraLength = leftBracket * 20 + rightBracket * 20 + joiningBrackets * 10;
-  const totalShelfLength = segmentLength + extraLength;
+      const extraLength = leftBracket * 20 + rightBracket * 20 + joiningBrackets * 10;
+      const totalShelfLength = segmentLength + extraLength;
 
-  const result = `
+      const result = `
 📦 Dane wejściowe:
 - Segmenty 50 cm: ${seg50}
 - Segmenty 75 cm: ${seg75}
@@ -62,11 +141,63 @@
 
 📏 Całkowita długość półki (segmenty + wsporniki): ${totalShelfLength} mm
 📏 Czyli: ${(totalShelfLength / 1000).toFixed(2)} m
-  `;
+      `;
 
-  document.getElementById("output").innerText = result;
-}
+      document.getElementById("output").innerText = result;
 
+      // ==== Wizualizacja ====
+      const visual = document.createElement("div");
+      visual.className = "shelf-visual";
+
+      // Lewy wspornik
+      const left = document.createElement("div");
+      left.className = "bracket";
+      visual.appendChild(left);
+
+      const addSegment = (size, addSupport) => {
+        const seg = document.createElement("div");
+        seg.className = "segment";
+
+        const pipe1 = document.createElement("div");
+        pipe1.className = "pipe";
+        pipe1.style.width = size + "px";
+
+        const pipe2 = pipe1.cloneNode(true);
+
+        seg.appendChild(pipe1);
+        seg.appendChild(pipe2);
+
+        if (addSupport) {
+          const support = document.createElement("div");
+          support.className = "support";
+          seg.appendChild(support);
+        }
+
+        visual.appendChild(seg);
+
+        // Wspornik łączący po każdym segmencie poza ostatnim
+        const isLast = ++segmentIndex >= totalSegments;
+        if (!isLast) {
+          const connector = document.createElement("div");
+          connector.className = "bracket";
+          visual.appendChild(connector);
+        }
+      };
+
+      let segmentIndex = 0;
+      for (let i = 0; i < seg50; i++) addSegment(50, false);
+      for (let i = 0; i < seg75; i++) addSegment(70, true);
+      for (let i = 0; i < seg100; i++) addSegment(95, true);
+
+      // Prawy wspornik
+      const right = document.createElement("div");
+      right.className = "bracket";
+      visual.appendChild(right);
+
+      const shelfContainer = document.getElementById("shelf-container");
+      shelfContainer.innerHTML = ""; // wyczyść starą wizualizację
+      shelfContainer.appendChild(visual);
+    }
   </script>
 </body>
 </html>
