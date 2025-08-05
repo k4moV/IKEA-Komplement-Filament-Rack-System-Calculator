@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Symulacja Półki</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shelf Configurator for IKEA Komplement Filament System by Kefir</title>
   <style>
     body {
       margin: 0;
@@ -35,20 +35,11 @@
     .input-section, .output-section {
       flex: 1 1 300px;
     }
-
-    .input-section label,
-    .input-section select,
-    .input-section input {
-      display: block;
-      margin-bottom: 12px; /* odstęp między polami */
-    }
-
-    /* osobno dla .output-section dodaj: */
-    .output-section {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+	.output-section {
+	display: flex;
+	justify-content: center; /* wyśrodkowanie poziome */
+	align-items: center;     /* wyśrodkowanie pionowe */
+	}
 
     .input-section label {
       display: block;
@@ -105,14 +96,12 @@
       width: 100%;
       box-sizing: border-box;
       position: relative;
-      align-items: center;
     }
 
     .bracket {
       width: 10px;
       height: 20px;
       display: inline-block;
-      box-sizing: border-box;
     }
 
     .bracket.left, .bracket.right {
@@ -124,16 +113,11 @@
     }
 
     .bracket.support {
-      display: inline-block;
-      vertical-align: top;
-      border: 1px solid red;
-      box-sizing: border-box;
-      position: static; /* zmiana na statyczne pozycjonowanie */
       background-color: yellow;
+      width: 10px;
       height: 20px;
-      width: 8px;
-      margin: 0 2px;
-      z-index: 1;
+      position: absolute;
+      top: 0;
     }
 
     .rod {
@@ -165,7 +149,7 @@
     .green { color: green; }
     .red { color: red; }
     .yellow { color: goldenrod; }
-
+    
     /* Added container for total length and capacity side by side */
     .length-capacity-container {
       display: flex;
@@ -176,34 +160,171 @@
     .length-capacity-container > div {
       font-size: 1.2em;
     }
+	.input-section label,
+	.input-section select,
+	.input-section input {
+	display: block;
+	margin-bottom: 15px; /* odstęp między polami */
+	}
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Symulacja Półki</h1>
+    <h1>Shelf Configurator for IKEA Komplement Filament System by Kefir</h1>
+    <br>
+    <h1><a href="https://www.printables.com/model/1373893" target="_blank">https://www.printables.com/model/1373893</a></h1>
     <div class="calculator">
       <div class="input-section">
-        <!-- Twoje pola input/select itp. -->
+        
+        <label>Select your segments:</label>
+        <label for="seg50">Segments build from IKEA Komplement 50 cm:</label>
+        <input id="seg50" type="number" min="0" value="0" class="segment-input" />
+        <label for="seg75">Segments build from IKEA Komplement 75 cm:</label>
+        <input id="seg75" type="number" min="0" value="0" class="segment-input" />
+        <label for="seg100">Segments build from IKEA Komplement 100 cm:</label>
+        <input id="seg100" type="number" min="0" value="0" class="segment-input" />
+		<label for="rodColor">Rod Color:</label>
+        <select id="rodColor" class="segment-input">
+          <option value="white">White</option>
+          <option value="gray">Gray</option>
+        </select>
+        <label for="spoolWidth">Spool width (mm):</label>
+        <input id="spoolWidth" type="number" min="1" value="68" class="segment-input" />
       </div>
       <div class="output-section">
-        <div id="visualization" class="visualization"></div>
+        <div class="button-wrapper">
+          <button class="calculate-button" onclick="calculate()">Calculate</button>
+        </div>
       </div>
     </div>
+
     <div class="results-container">
-      <!-- Wyniki -->
+      <div class="section-box length-capacity-container">
+        <div>
+          <div class="section-title">Total Length</div>
+          <div id="shelfLength"></div>
+        </div>
+        <div>
+          <div class="section-title">Spool Capacity</div>
+          <div id="spoolCapacity"></div>
+        </div>
+      </div>
+      <div class="section-box">
+        <div class="section-title">Visualization</div>
+        <div id="visualization" class="visualization"></div>
+      </div>
+      <div class="output-columns">
+        <div class="output-column">
+          <div class="section-title">Brackets to 3Dprint</div>
+          <div id="bracketCounts" class="bracket-info"></div>
+        </div>
+        <div class="output-column">
+          <div class="section-title">IKEA shopping list</div>
+          <div id="ikeaList"></div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
     const ROD_LENGTHS = {
-      50: 500,
-      75: 700,
-      100: 950
+      '50': 450,
+      '75': 700,
+      '100': 950
     };
 
-    // Przykładowe dane testowe (możesz zastąpić własnymi)
-    const segments = [50, 75, 100, 50];
-    const rodColor = 'gray';
+    const IKEA_CODES = {
+      white: {
+        '50': '902.568.93',
+        '75': '402.568.95',
+        '100': '302.568.91'
+      },
+      gray: {
+        '50': '402.569.42',
+        '75': '002.569.44',
+        '100': '802.569.40'
+      }
+    };
+
+    function calculate() {
+      const rodColor = document.getElementById('rodColor').value;
+      const seg50 = parseInt(document.getElementById('seg50').value) || 0;
+      const seg75 = parseInt(document.getElementById('seg75').value) || 0;
+      const seg100 = parseInt(document.getElementById('seg100').value) || 0;
+      const spoolWidth = parseFloat(document.getElementById('spoolWidth').value) || 68;
+
+      const segments = [];
+      for (let i = 0; i < seg50; i++) segments.push(50);
+      for (let i = 0; i < seg75; i++) segments.push(75);
+      for (let i = 0; i < seg100; i++) segments.push(100);
+
+      // Calculate total length
+      // Base: sum of rod lengths + 20mm left bracket + 20mm right bracket + 10mm connectors between segments
+      const totalLength = segments.reduce((acc, val) => acc + ROD_LENGTHS[val], 0)
+        + 20 + 20 + (segments.length - 1) * 10;
+
+      // Calculate spool capacity:
+      // For each segment:
+      // Effective length = rod length - 20 (10mm left side bracket + 10mm right side bracket)
+      // For 75 or 100 segments, support bracket removes 30mm from center (divided 15mm left and right)
+      // So each half length = (effective length / 2) - 15
+      // On 50 segment: full effective length is available (no support bracket)
+      // Number of spools per segment = sum over halves (if 75 or 100) or full length / spoolWidth (50)
+      // Then sum all segments
+      
+      let totalSpoolCapacity = 0;
+      segments.forEach(seg => {
+        const rodLen = ROD_LENGTHS[seg];
+        const effectiveLen = rodLen - 20; // subtract 10mm each side for side brackets
+        if (seg === 75 || seg === 100) {
+          // split into two halves minus support bracket space
+          const halfLen = (effectiveLen / 2) - 15; // 15mm per half for support bracket
+          const spoolsLeft = Math.floor(halfLen / spoolWidth);
+          const spoolsRight = Math.floor(halfLen / spoolWidth);
+          totalSpoolCapacity += spoolsLeft + spoolsRight;
+        } else {
+          // no support bracket
+          totalSpoolCapacity += Math.floor(effectiveLen / spoolWidth);
+        }
+      });
+
+      // Bracket counts
+      const bracketCounts = {
+        left: segments.length > 0 ? 1 : 0,
+        right: segments.length > 0 ? 1 : 0,
+        connector: Math.max(0, segments.length - 1),
+        support: segments.filter(len => len === 75 || len === 100).length
+      };
+
+      // IKEA items
+      const ikeaItems = {
+        '50': seg50 * 2,
+        '75': seg75 * 2,
+        '100': seg100 * 2
+      };
+
+      document.getElementById('shelfLength').innerText = `${totalLength} mm`;
+      document.getElementById('spoolCapacity').innerText = `${totalSpoolCapacity} spools`;
+
+      let bracketHTML = '';
+      if (bracketCounts.left > 0) bracketHTML += `<span class="green">Holder LEFT x ${bracketCounts.left}</span>`;
+      if (bracketCounts.right > 0) bracketHTML += `<span class="green">Holder RIGHT x ${bracketCounts.right}</span>`;
+      if (bracketCounts.connector > 0) bracketHTML += `<span class="red">Holder CONNECTOR x ${bracketCounts.connector}</span>`;
+      if (bracketCounts.support > 0) bracketHTML += `<span class="yellow">Holder MIDDLE x ${bracketCounts.support}</span>`;
+      document.getElementById('bracketCounts').innerHTML = bracketHTML;
+
+      let ikeaHTML = '';
+      Object.keys(ikeaItems).forEach(k => {
+        if (ikeaItems[k] > 0) {
+          const code = IKEA_CODES[rodColor][k];
+          const searchUrl = `https://www.google.com/search?q=${code}`;
+          ikeaHTML += `<div>${ikeaItems[k]}x Komplement ${k} cm - <a href="${searchUrl}" target="_blank">${code}</a></div>`;
+        }
+      });
+      document.getElementById('ikeaList').innerHTML = ikeaHTML;
+
+      renderVisualization(segments, rodColor);
+    }
 
     function renderVisualization(segments, color) {
       const container = document.getElementById('visualization');
@@ -216,41 +337,21 @@
       row.appendChild(left);
 
       segments.forEach((seg, index) => {
-        const colorCode = color === 'gray' ? '#666' : '#ccc';
+        const rod = document.createElement('div');
+        rod.className = 'rod';
+        rod.style.backgroundColor = color === 'gray' ? '#666' : '#ccc';
+        const width = ROD_LENGTHS[seg] / 5;
+        rod.style.width = width + 'px';
 
         if (seg === 75 || seg === 100) {
-          // Połówki rury
-          const halfWidth = ROD_LENGTHS[seg] / 10; // połowa szerokości, bo dzielimy na 2
-
-          // Lewa połówka rury
-          const leftHalf = document.createElement('div');
-          leftHalf.className = 'rod';
-          leftHalf.style.backgroundColor = colorCode;
-          leftHalf.style.width = halfWidth + 'px';
-          row.appendChild(leftHalf);
-
-          // Żółty znacznik - wspornik
           const support = document.createElement('div');
           support.className = 'bracket support';
-          // szerokość i wysokość nadawane w CSS
-          row.appendChild(support);
-
-          // Prawa połówka rury
-          const rightHalf = document.createElement('div');
-          rightHalf.className = 'rod';
-          rightHalf.style.backgroundColor = colorCode;
-          rightHalf.style.width = halfWidth + 'px';
-          row.appendChild(rightHalf);
-        } else {
-          // Cała rura (np. 50cm)
-          const rod = document.createElement('div');
-          rod.className = 'rod';
-          rod.style.backgroundColor = colorCode;
-          rod.style.width = (ROD_LENGTHS[seg] / 5) + 'px';
-          row.appendChild(rod);
+          support.style.left = (width / 2 - 5) + 'px';
+          rod.appendChild(support);
         }
 
-        // Dodajemy łącznik jeśli nie ostatni segment
+        row.appendChild(rod);
+
         if (index < segments.length - 1) {
           const connector = document.createElement('div');
           connector.className = 'bracket connector';
@@ -264,9 +365,6 @@
 
       container.appendChild(row);
     }
-
-    // Wywołanie przykładowe
-    renderVisualization(segments, rodColor);
   </script>
 </body>
 </html>
