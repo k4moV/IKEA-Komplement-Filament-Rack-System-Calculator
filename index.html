@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Kalkulator półki na filamenty</title>
   <style>
     body {
@@ -65,6 +65,18 @@
       margin: 0 2px;
     }
 
+    .bracket-left {
+      background-color: #4CAF50;
+    }
+
+    .bracket-right {
+      background-color: #4CAF50;
+    }
+
+    .bracket-join {
+      background-color: #F44336;
+    }
+
     .support {
       width: 8px;
       height: 15px;
@@ -76,6 +88,41 @@
     #shelf-container {
       margin-top: 20px;
     }
+
+    /* Legenda kolorów */
+    .legend {
+      display: flex;
+      gap: 15px;
+      margin-top: 15px;
+      font-size: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-color {
+      width: 18px;
+      height: 18px;
+      border-radius: 3px;
+      border: 1px solid #ccc;
+    }
+    .legend-left {
+      background-color: #4CAF50;
+    }
+    .legend-right {
+      background-color: #4CAF50;
+    }
+    .legend-join {
+      background-color: #F44336;
+    }
+    .legend-support {
+      background-color: orange;
+    }
   </style>
 </head>
 <body>
@@ -85,17 +132,17 @@
 
   <label>
     Segmenty 50 cm (450 mm):
-    <input type="number" id="seg50" min="0" value="0">
+    <input type="number" id="seg50" min="0" value="0" />
   </label>
 
   <label>
     Segmenty 75 cm (700 mm):
-    <input type="number" id="seg75" min="0" value="0">
+    <input type="number" id="seg75" min="0" value="0" />
   </label>
 
   <label>
     Segmenty 100 cm (950 mm):
-    <input type="number" id="seg100" min="0" value="0">
+    <input type="number" id="seg100" min="0" value="0" />
   </label>
 
   <button onclick="calculate()">Oblicz</button>
@@ -104,6 +151,22 @@
   <pre id="output"></pre>
 
   <div id="shelf-container"></div>
+
+  <!-- Legenda kolorów -->
+  <div id="legend" class="legend">
+    <div class="legend-item">
+      <div class="legend-color legend-left"></div> Lewy wspornik zamykający (zielony)
+    </div>
+    <div class="legend-item">
+      <div class="legend-color legend-right"></div> Prawy wspornik zamykający (zielony)
+    </div>
+    <div class="legend-item">
+      <div class="legend-color legend-join"></div> Wspornik łączący (czerwony)
+    </div>
+    <div class="legend-item">
+      <div class="legend-color legend-support"></div> Wspornik podtrzymujący (żółty)
+    </div>
+  </div>
 
   <script>
     function calculate() {
@@ -151,7 +214,7 @@
 
       // Lewy wspornik
       const left = document.createElement("div");
-      left.className = "bracket";
+      left.className = "bracket bracket-left";
       visual.appendChild(left);
 
       const addSegment = (size, addSupport) => {
@@ -179,7 +242,7 @@
         const isLast = ++segmentIndex >= totalSegments;
         if (!isLast) {
           const connector = document.createElement("div");
-          connector.className = "bracket";
+          connector.className = "bracket bracket-join";
           visual.appendChild(connector);
         }
       };
@@ -191,7 +254,7 @@
 
       // Prawy wspornik
       const right = document.createElement("div");
-      right.className = "bracket";
+      right.className = "bracket bracket-right";
       visual.appendChild(right);
 
       const shelfContainer = document.getElementById("shelf-container");
