@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Kalkulator Półek na filamenty z systemu IKEA Komplement</title>
   <style>
     body {
@@ -46,6 +46,7 @@
       width: 100%;
       padding: 5px;
       font-size: 1em;
+      box-sizing: border-box;
     }
 
     .button-wrapper {
@@ -95,47 +96,69 @@
 
     .visualization {
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      flex-direction: row;
       align-items: center;
+      gap: 0;
+      overflow-x: auto;
+      padding-bottom: 10px;
     }
 
     .shelf-row {
       display: flex;
-      width: 100%;
-      box-sizing: border-box;
+      align-items: center;
       position: relative;
-      height: 20px;
+      gap: 0;
+      user-select: none;
     }
 
     .bracket {
-      width: 10px;
-      height: 20px;
+      width: 20px;
+      height: 40px;
       display: inline-block;
+      box-sizing: border-box;
     }
 
     .bracket.left, .bracket.right {
       background-color: green;
+      border-radius: 0;
     }
 
     .bracket.connector {
       background-color: red;
+      width: 10px;
+      height: 40px;
+      margin-left: 0;
+      margin-right: 0;
+      border-radius: 0;
     }
 
     .bracket.support {
-      background-color: yellow;
+      background-color: goldenrod;
       width: 10px;
-      height: 20px;
+      height: 40px;
       position: absolute;
       top: 0;
+      border-radius: 0;
     }
 
     .rod {
-      height: 20px;
-      background-color: #888;
+      height: 40px;
+      background-color: #bbb;
       display: inline-block;
       position: relative;
       border-radius: 0;
+      margin: 0;
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .rod.white {
+      background-color: #e8e8e8;
+      border: 1px solid #ccc;
+    }
+
+    .rod.gray {
+      background-color: #666;
     }
 
     .output-columns {
@@ -253,122 +276,208 @@
       currentLang = currentLang === 'pl' ? 'en' : 'pl';
       const t = translations[currentLang];
       document.getElementById('langBtn').innerText = currentLang === 'pl' ? 'EN' : 'PL';
-
       document.getElementById('title').innerText = t.title;
       document.getElementById('labelColor').innerText = t.labelColor;
       document.getElementById('labelPick').innerText = t.labelPick;
       document.getElementById('label50').innerText = t.label50;
       document.getElementById('label75').innerText = t.label75;
       document.getElementById('label100').innerText = t.label100;
-      document.getElementById('calculateBtn').innerText = t.calculate;
+      document.querySelector('.calculate-button').innerText = t.calculate;
       document.getElementById('lengthTitle').innerText = t.lengthTitle;
       document.getElementById('visualTitle').innerText = t.visualTitle;
       document.getElementById('bracketsTitle').innerText = t.bracketsTitle;
       document.getElementById('ikeaTitle').innerText = t.ikeaTitle;
+      calculate(); // Refresh results on language change
+    }
 
-      // Po przetłumaczeniu przelicz, aby odświeżyć opisy wsporników i innych tekstów w wynikach
-      calculate();
+    // Dane IKEA
+    const ikeaProducts = {
+      left: { code: '002.225.37', name: 'Wspornik lewy' },
+      right: { code: '002.225.38', name: 'Wspornik prawy' },
+      connector: { code: '002.225.39', name: 'Wspornik łączący' },
+      support: { code: '403.234.32', name: 'Wspornik podtrzymujący' }
+    };
+
+    function createGoogleSearchLink(code) {
+      const url = `https://www.google.com/search?q=${code}`;
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer">${code}</a>`;
     }
 
     function calculate() {
-      const t = translations[currentLang];
+      // Pobierz wartości segmentów
       const seg50 = parseInt(document.getElementById('seg50').value) || 0;
       const seg75 = parseInt(document.getElementById('seg75').value) || 0;
       const seg100 = parseInt(document.getElementById('seg100').value) || 0;
       const rodColor = document.getElementById('rodColor').value;
 
-      // Stałe długości segmentów w cm
-      const lengths = {50: 50, 75: 75, 100: 100};
+      const segmentLengths = [50, 75, 100];
 
-      // Obliczamy łączną długość półek
-      const totalLength = seg50 * lengths[50] + seg75 * lengths[75] + seg100 * lengths[100];
-
-      // Wyświetlamy długość całkowitą
-      document.getElementById('shelfLength').innerText = totalLength + ' cm';
-
-      // Oblicz ilość wsporników
-      // Założenie: na każdą półkę potrzeba 2 wsporników bocznych + (ilość segmentów - 1) łączników
+      // Całkowita liczba segmentów i ich długość w cm
       const totalSegments = seg50 + seg75 + seg100;
+
+      // Kalkulacja długości półek:
+      // Długość to suma segmentów + (szerokość wsporników * (ilość segmentów +1))
+      // Szerokość wspornika: 1.5 cm (15 mm)
+      const bracketWidth = 1.5; // cm
+
+      // Suma długości segmentów:
+      const segmentsLengthCm = seg50 * 50 + seg75 * 75 + seg100 * 100;
+
+      // Całkowita długość półki:
+      // Liczba wsporników poziomych: totalSegments + 1 (bo po obu końcach plus między segmentami)
+      // Liczba wsporników pionowych (łączących) to totalSegments - 1 (między segmentami)
+      // Liczba wsporników podtrzymujących to totalSegments (jeden pod każdy segment)
+      const totalLengthCm = segmentsLengthCm + bracketWidth * (totalSegments + 1);
+
+      // Wyświetl długość w cm i mm (np. 177.5 cm)
+      document.getElementById('shelfLength').innerText = totalLengthCm.toFixed(1) + ' cm';
+
+      // Wizualizacja
+      // Czyścimy poprzednią wizualizację
+      const viz = document.getElementById('visualization');
+      viz.innerHTML = '';
+
       if (totalSegments === 0) {
+        viz.innerHTML = currentLang === 'pl' ? 'Wprowadź ilość segmentów.' : 'Please enter segments quantity.';
+        // Czyścimy inne wyniki
         document.getElementById('bracketCounts').innerHTML = '';
         document.getElementById('ikeaList').innerHTML = '';
-        document.getElementById('visualization').innerHTML = '';
         return;
       }
 
-      // Wsporniki boczne - 2 (lewy i prawy)
-      const leftBrackets = 1;
-      const rightBrackets = 1;
+      // Wizualizacja - budujemy ciąg elementów: wspornik lewy, segment + wspornik łączący itd, wspornik prawy
+      // Każdy segment jest "rod" o szerokości = segment_length + bracketWidth (z lewej lub prawej)
+      // Dla uproszczenia: każdy segment to szara belka (szary lub biały wg wyboru)
 
-      // Wsporniki łączące (łączniki między segmentami)
-      const connectorBrackets = totalSegments - 1;
+      function createBracket(type) {
+        const div = document.createElement('div');
+        div.classList.add('bracket');
+        div.classList.add(type);
+        div.title = translations[currentLang][type];
+        if (type === 'left' || type === 'right') {
+          div.style.width = bracketWidth * 10 + 'px'; // 15mm = 1.5cm * 10px/cm = 15px
+          div.style.height = '40px';
+          div.style.backgroundColor = 'green';
+        } else if (type === 'connector') {
+          div.style.width = bracketWidth * 6 + 'px'; // trochę węższy
+          div.style.height = '40px';
+          div.style.backgroundColor = 'red';
+        } else if (type === 'support') {
+          div.style.width = bracketWidth * 6 + 'px';
+          div.style.height = '40px';
+          div.style.backgroundColor = 'goldenrod';
+          div.style.position = 'relative';
+          div.style.top = '10px';
+        }
+        return div;
+      }
 
-      // Wsporniki podtrzymujące (support) dla długich segmentów - jeśli potrzeba (przykładowo dla 75 i 100 cm)
-      // Załóżmy, że dla segmentów 75 cm i 100 cm potrzeba po 1 wsporniku podtrzymującym na segment
-      const supportBrackets = seg75 + seg100;
+      // Budujemy element segmentu
+      function createRod(lengthCm, color) {
+        const div = document.createElement('div');
+        div.classList.add('rod');
+        div.classList.add(color);
+        div.style.width = (lengthCm * 10) + 'px'; // 10px na 1 cm
+        div.style.height = '40px';
+        div.style.borderRadius = '0';
+        div.style.margin = '0';
+        div.style.flexShrink = '0';
+        return div;
+      }
 
-      // Wyświetl wsporniki
-      document.getElementById('bracketCounts').innerHTML = `
-        <span class="green">${t.left}: ${leftBrackets}</span>
-        <span class="green">${t.right}: ${rightBrackets}</span>
-        <span class="red">${t.connector}: ${connectorBrackets}</span>
-        <span class="yellow">${t.support}: ${supportBrackets}</span>
+      // Tworzymy rząd półki z segmentów i wsporników
+      // Struktura: [left bracket] [segment][connector] [segment][connector] ... [segment] [right bracket]
+
+      // Łączymy segmenty w jeden rząd
+      let segmentsArray = [];
+      // Dodajemy segmenty 50cm
+      for (let i = 0; i < seg50; i++) {
+        segmentsArray.push(50);
+      }
+      // Dodajemy segmenty 75cm
+      for (let i = 0; i < seg75; i++) {
+        segmentsArray.push(75);
+      }
+      // Dodajemy segmenty 100cm
+      for (let i = 0; i < seg100; i++) {
+        segmentsArray.push(100);
+      }
+
+      // Cały rząd
+      viz.appendChild(createBracket('left'));
+
+      segmentsArray.forEach((segLength, idx) => {
+        viz.appendChild(createRod(segLength, rodColor));
+        if (idx < segmentsArray.length - 1) {
+          viz.appendChild(createBracket('connector'));
+        }
+      });
+
+      viz.appendChild(createBracket('right'));
+
+      // Wsporniki podtrzymujące (support) - jeden pod każdym segmentem - pokazujemy pod wizualizacją jako rząd punktów
+      const supportRow = document.createElement('div');
+      supportRow.style.display = 'flex';
+      supportRow.style.justifyContent = 'flex-start';
+      supportRow.style.marginTop = '5px';
+      supportRow.style.gap = '0';
+
+      segmentsArray.forEach(() => {
+        const support = createBracket('support');
+        supportRow.appendChild(support);
+      });
+      viz.appendChild(supportRow);
+
+      // Liczymy wsporniki:
+      // 2 na koniec (left, right)
+      // 1 na łączenie segmentów (connector) = totalSegments-1, jeśli >0
+      // 1 podtrzymujący na każdy segment
+
+      const leftCount = 1;
+      const rightCount = 1;
+      const connectorCount = totalSegments > 1 ? totalSegments - 1 : 0;
+      const supportCount = totalSegments;
+
+      // Wyświetlamy wyniki
+      const bracketCountsDiv = document.getElementById('bracketCounts');
+      bracketCountsDiv.innerHTML = `
+        <span class="green">${translations[currentLang].left}: ${leftCount}</span>
+        <span class="green">${translations[currentLang].right}: ${rightCount}</span>
+        <span class="red">${translations[currentLang].connector}: ${connectorCount}</span>
+        <span class="yellow">${translations[currentLang].support}: ${supportCount}</span>
       `;
 
-      // Lista zakupów IKEA (dla półek i drążków)
-      // Załóżmy, że drążki to "clothes rail" - różnią się kolorem i długością
+      // Lista zakupów IKEA:
+      // Zakładamy, że na 1 segment potrzebujemy kompletu 2 wsporników (left + right) na końce segmentu
+      // oraz 1 wspornik podtrzymujący, i na połączenia między segmentami 1 wspornik łączący na każde złączenie
+      // Liczymy łącznie:
+      // Wspornik lewy i prawy: 2 * totalSegments
+      // Wspornik podtrzymujący: totalSegments
+      // Wspornik łączący: totalSegments-1 (jeśli >0)
 
-      let ikeaHtml = '';
-      if(seg50 > 0) ikeaHtml += `${seg50} x IKEA Komplement 50 cm clothes rail (${rodColor})<br>`;
-      if(seg75 > 0) ikeaHtml += `${seg75} x IKEA Komplement 75 cm clothes rail (${rodColor})<br>`;
-      if(seg100 > 0) ikeaHtml += `${seg100} x IKEA Komplement 100 cm clothes rail (${rodColor})<br>`;
+      const ikeaListDiv = document.getElementById('ikeaList');
 
-      document.getElementById('ikeaList').innerHTML = ikeaHtml;
-
-      // Wizualizacja półek
-      const vizContainer = document.getElementById('visualization');
-      vizContainer.innerHTML = '';
-
-      // Funkcja do tworzenia elementu półki
-      function createShelfRow(lengthCm) {
-        const row = document.createElement('div');
-        row.classList.add('shelf-row');
-
-        // Lewy wspornik
-        const left = document.createElement('div');
-        left.classList.add('bracket', 'left');
-        row.appendChild(left);
-
-        // Drążek - szerokość proporcjonalna do długości segmentu
-        const rod = document.createElement('div');
-        rod.classList.add('rod');
-        rod.style.width = (lengthCm * 3) + 'px'; // skala 3px = 1cm
-        rod.style.backgroundColor = rodColor === 'white' ? '#eee' : '#888';
-        row.appendChild(rod);
-
-        // Prawy wspornik
-        const right = document.createElement('div');
-        right.classList.add('bracket', 'right');
-        row.appendChild(right);
-
-        return row;
+      // Funkcja pomocnicza generująca element listy z linkiem do Google:
+      function itemRow(product, qty) {
+        if (qty <= 0) return '';
+        return `<div>${qty} × ${product.name} - ${createGoogleSearchLink(product.code)}</div>`;
       }
 
-      // Dodaj segmenty do wizualizacji
-      for(let i = 0; i < seg50; i++) {
-        vizContainer.appendChild(createShelfRow(50));
-      }
-      for(let i = 0; i < seg75; i++) {
-        vizContainer.appendChild(createShelfRow(75));
-      }
-      for(let i = 0; i < seg100; i++) {
-        vizContainer.appendChild(createShelfRow(100));
-      }
+      const leftQty = totalSegments * 1; // po 1 na każdy segment (z lewej strony)
+      const rightQty = totalSegments * 1; // po 1 na każdy segment (z prawej)
+      const supportQty = totalSegments;
+      const connectorQty = connectorCount;
+
+      ikeaListDiv.innerHTML =
+        itemRow(ikeaProducts.left, leftQty) +
+        itemRow(ikeaProducts.right, rightQty) +
+        itemRow(ikeaProducts.support, supportQty) +
+        itemRow(ikeaProducts.connector, connectorQty);
     }
 
-    // Na start ustawiamy domyślnie język polski
+    // Inicjalizacja - wyświetl po ładowaniu
     window.onload = () => {
-      toggleLanguage(); // aby załadować teksty i wykonać pierwsze obliczenia
+      calculate();
     };
   </script>
 </body>
