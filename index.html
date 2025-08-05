@@ -237,7 +237,7 @@
           szary: "Gray"
         },
         legendLeft: "Left and right bracket",
-        legendRight: "Joining bracket",
+        legendRight: "Connecting bracket",
         legendSupport: "Supporting bracket (75 & 100 cm)",
         ikeaCodes: {
           50: "402.569.42",
@@ -300,15 +300,15 @@
 
       // Wymiary rur segmentów
       const segmentLengths = {
-        50: 50,
-        75: 75,
-        100: 100
+        50: 45,
+        75: 70,
+        100: 95
       };
 
       // Wsporniki - w cm
-      const bracketLeftRight = 6; // szerokość wspornika lewego/prawego
-      const bracketJoining = 4; // szerokość wspornika łączącego
-      const bracketSupport75_100 = 3; // wspornik podtrzymujący dla 75 i 100
+      const bracketLeftRight = 2; // szerokość wspornika lewego/prawego
+      const bracketJoining = 1; // szerokość wspornika łączącego
+      const bracketSupport75_100 = 0; // wspornik podtrzymujący dla 75 i 100
 
       // Lista segmentów do ułożenia (kolejność: 50,75,100)
       const segments = [];
@@ -354,10 +354,10 @@
 
       // Lista zakupów
       let shoppingText = "";
-      shoppingText += `Wspornik lewy: 1 szt\n`;
-      shoppingText += `Wspornik prawy: 1 szt\n`;
-      if (countJoiningBrackets > 0) shoppingText += `Wspornik łączący: ${countJoiningBrackets} szt\n`;
-      if (supportBracketsCount > 0) shoppingText += `Wspornik podtrzymujący: ${supportBracketsCount} szt\n`;
+      //shoppingText += `Wspornik lewy: 1 szt\n`;
+      //shoppingText += `Wspornik prawy: 1 szt\n`;
+      //if (countJoiningBrackets > 0) shoppingText += `Wspornik łączący: ${countJoiningBrackets} szt\n`;
+      //if (supportBracketsCount > 0) shoppingText += `Wspornik podtrzymujący: ${supportBracketsCount} szt\n`;
       for (const s of [50, 75, 100]) {
         if (segCount[s] > 0) shoppingText += `Segment ${s} cm: ${segCount[s]} szt (kod IKEA: ${texts[currentLang].ikeaCodes[s]})\n`;
       }
@@ -366,8 +366,8 @@
       shoppingList.textContent = shoppingText;
 
       // Wyświetl długość w nagłówku i wymiarach
-      dimensions.textContent = `Suma rur: ${totalPipeLength} cm\n` +
-                               `Suma wsporników: ${(bracketLeftRight * 2) + (bracketJoining * countJoiningBrackets) + (bracketSupport75_100 * supportBracketsCount)} cm\n` +
+      dimensions.textContent = //`Suma rur: ${totalPipeLength} cm\n` +
+                               //`Suma wsporników: ${(bracketLeftRight * 2) + (bracketJoining * countJoiningBrackets) + (bracketSupport75_100 * supportBracketsCount)} cm\n` +
                                `Łączna długość półki: ${totalLength} cm`;
 
       // Wizualizacja
