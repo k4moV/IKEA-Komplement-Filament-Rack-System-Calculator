@@ -344,13 +344,23 @@
         const width = ROD_LENGTHS[seg] / 5;
         rod.style.width = width + 'px';
 
-        if (seg === 75 || seg === 100) {
+        /*if (seg === 75 || seg === 100) {
           const support = document.createElement('div');
           support.className = 'bracket support';
           const supportWidth = width / 5; 
           support.style.left = (width / 2 - supportWidth / 2) + 'px';
           support.style.transform = 'translateX(-50%)';
           rod.appendChild(support);
+        }*/
+        if (seg === 75 || seg === 100) {
+        const support = document.createElement('div');
+        support.className = 'bracket support';
+
+        const supportWidth = Math.max(width / 10, 6); // minimalna szerokość: 6px
+        support.style.width = supportWidth + 'px';
+        support.style.left = (width / 2 - supportWidth / 2) + 'px';
+
+        rod.appendChild(support);
         }
 
         row.appendChild(rod);
