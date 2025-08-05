@@ -63,6 +63,7 @@
 
     .results-container {
       display: flex;
+      flex-direction: column;
       gap: 20px;
       margin-top: 30px;
     }
@@ -71,7 +72,6 @@
       background: #efefef;
       padding: 15px;
       border-radius: 10px;
-      flex: 1;
     }
 
     .section-title {
@@ -127,7 +127,6 @@
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
-      margin-top: 30px;
     }
 
     .output-column {
@@ -145,13 +144,24 @@
     .green { color: green; }
     .red { color: red; }
     .yellow { color: goldenrod; }
+    
+    /* Added container for total length and capacity side by side */
+    .length-capacity-container {
+      display: flex;
+      gap: 40px;
+      align-items: baseline;
+    }
+
+    .length-capacity-container > div {
+      font-size: 1.2em;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Shelf Configurator for IKEA Komplement Filament System by Kefir</h1>
-    <br />
-    <h1><a href="https://www.printables.com/model/1373893">https://www.printables.com/model/1373893</a></h1>
+    <br>
+    <h1><a href="https://www.printables.com/model/1373893" target="_blank">https://www.printables.com/model/1373893</a></h1>
     <div class="calculator">
       <div class="input-section">
         <label for="rodColor">Rod Color:</label>
@@ -162,10 +172,12 @@
         <label>Select your segments:</label>
         <label for="seg50">Segments build from IKEA Komplement 50 cm:</label>
         <input id="seg50" type="number" min="0" value="0" class="segment-input" />
-        <label for="seg75">>Segments build from IKEA Komplement 75 cm:</label>
+        <label for="seg75">Segments build from IKEA Komplement 75 cm:</label>
         <input id="seg75" type="number" min="0" value="0" class="segment-input" />
-        <label for="seg100">>Segments build from IKEA Komplement 100 cm:</label>
+        <label for="seg100">Segments build from IKEA Komplement 100 cm:</label>
         <input id="seg100" type="number" min="0" value="0" class="segment-input" />
+        <label for="spoolWidth">Spool width (mm):</label>
+        <input id="spoolWidth" type="number" min="1" value="68" class="segment-input" />
       </div>
       <div class="output-section">
         <div class="button-wrapper">
@@ -175,31 +187,29 @@
     </div>
 
     <div class="results-container">
-      <div class="section-box">
-        <div class="section-title">Total Length</div>
-        <div id="shelfLength"></div>
+      <div class="section-box length-capacity-container">
+        <div>
+          <div class="section-title">Total Length</div>
+          <div id="shelfLength"></div>
+        </div>
+        <div>
+          <div class="section-title">Spool Capacity</div>
+          <div id="spoolCapacity"></div>
+        </div>
       </div>
-      <div class="section-box">
-        <div class="section-title">Estimated Spools Capacity (68 mm spools)</div>
-        <div id="spoolCapacity"></div>
-      </div>
-    </div>
-
-    <div class="results-container" style="margin-top: 10px;">
       <div class="section-box">
         <div class="section-title">Visualization</div>
         <div id="visualization" class="visualization"></div>
       </div>
-    </div>
-
-    <div class="output-columns">
-      <div class="output-column">
-        <div class="section-title">Brackets to 3Dprint</div>
-        <div id="bracketCounts" class="bracket-info"></div>
-      </div>
-      <div class="output-column">
-        <div class="section-title">IKEA shopping list</div>
-        <div id="ikeaList"></div>
+      <div class="output-columns">
+        <div class="output-column">
+          <div class="section-title">Brackets to 3Dprint</div>
+          <div id="bracketCounts" class="bracket-info"></div>
+        </div>
+        <div class="output-column">
+          <div class="section-title">IKEA shopping list</div>
+          <div id="ikeaList"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -229,35 +239,44 @@
       const seg50 = parseInt(document.getElementById('seg50').value) || 0;
       const seg75 = parseInt(document.getElementById('seg75').value) || 0;
       const seg100 = parseInt(document.getElementById('seg100').value) || 0;
+      const spoolWidth = parseFloat(document.getElementById('spoolWidth').value) || 68;
 
       const segments = [];
       for (let i = 0; i < seg50; i++) segments.push(50);
       for (let i = 0; i < seg75; i++) segments.push(75);
       for (let i = 0; i < seg100; i++) segments.push(100);
 
-      // Obliczamy długość rury w mm (bez wsporników)
-      const totalRodLength = segments.reduce((acc, val) => acc + ROD_LENGTHS[val], 0);
+      // Calculate total length
+      // Base: sum of rod lengths + 20mm left bracket + 20mm right bracket + 10mm connectors between segments
+      const totalLength = segments.reduce((acc, val) => acc + ROD_LENGTHS[val], 0)
+        + 20 + 20 + (segments.length - 1) * 10;
 
-      // Uwzględniamy wsporniki:
-      // boczne (left+right): zabierają po 10mm z długości każda
-      const sideBracketsUsage = 2 * 10; // 20 mm
+      // Calculate spool capacity:
+      // For each segment:
+      // Effective length = rod length - 20 (10mm left side bracket + 10mm right side bracket)
+      // For 75 or 100 segments, support bracket removes 30mm from center (divided 15mm left and right)
+      // So each half length = (effective length / 2) - 15
+      // On 50 segment: full effective length is available (no support bracket)
+      // Number of spools per segment = sum over halves (if 75 or 100) or full length / spoolWidth (50)
+      // Then sum all segments
+      
+      let totalSpoolCapacity = 0;
+      segments.forEach(seg => {
+        const rodLen = ROD_LENGTHS[seg];
+        const effectiveLen = rodLen - 20; // subtract 10mm each side for side brackets
+        if (seg === 75 || seg === 100) {
+          // split into two halves minus support bracket space
+          const halfLen = (effectiveLen / 2) - 15; // 15mm per half for support bracket
+          const spoolsLeft = Math.floor(halfLen / spoolWidth);
+          const spoolsRight = Math.floor(halfLen / spoolWidth);
+          totalSpoolCapacity += spoolsLeft + spoolsRight;
+        } else {
+          // no support bracket
+          totalSpoolCapacity += Math.floor(effectiveLen / spoolWidth);
+        }
+      });
 
-      // łączniki: (segments.length -1) * 2 * 10mm (po 10mm z każdej strony łącznika)
-      const connectorBracketsUsage = (segments.length > 1) ? (segments.length - 1) * 2 * 10 : 0;
-
-      // podporowe: dla każdego segmentu 75 lub 100 dodajemy 30 mm
-      const supportBracketsUsage = segments.filter(len => len === 75 || len === 100).length * 30;
-
-      // Faktyczna długość dostępna na rurze (po odjęciu zabranego miejsca)
-      const availableRodLength = totalRodLength - sideBracketsUsage - connectorBracketsUsage - supportBracketsUsage;
-
-      // Dodajemy 20mm na oba końce do całkowitej długości półki (np. zapas)
-      const totalLength = totalRodLength + 20 + 20 + (segments.length - 1) * 10;
-
-      // Obliczamy ile szpulek po 68mm szerokości zmieści się na dostępnej długości
-      const spoolWidth = 68;
-      const spoolsCapacity = availableRodLength > 0 ? Math.floor(availableRodLength / spoolWidth) : 0;
-
+      // Bracket counts
       const bracketCounts = {
         left: segments.length > 0 ? 1 : 0,
         right: segments.length > 0 ? 1 : 0,
@@ -265,6 +284,7 @@
         support: segments.filter(len => len === 75 || len === 100).length
       };
 
+      // IKEA items
       const ikeaItems = {
         '50': seg50 * 2,
         '75': seg75 * 2,
@@ -272,7 +292,7 @@
       };
 
       document.getElementById('shelfLength').innerText = `${totalLength} mm`;
-      document.getElementById('spoolCapacity').innerText = `${spoolsCapacity} spools`;
+      document.getElementById('spoolCapacity').innerText = `${totalSpoolCapacity} spools`;
 
       let bracketHTML = '';
       if (bracketCounts.left > 0) bracketHTML += `<span class="green">Holder LEFT x ${bracketCounts.left}</span>`;
@@ -299,7 +319,6 @@
       container.innerHTML = '';
       const row = document.createElement('div');
       row.className = 'shelf-row';
-      row.style.position = 'relative';
 
       const left = document.createElement('div');
       left.className = 'bracket left';
