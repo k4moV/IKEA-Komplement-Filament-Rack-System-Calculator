@@ -127,6 +127,7 @@
       position: absolute;
       top: 0;
       border: 1px solid red;
+      z-index: 2;
     }
 
     .rod {
@@ -354,15 +355,16 @@
           rod.appendChild(support);
         }*/
         if (seg === 75 || seg === 100) {
-        const support = document.createElement('div');
-        support.className = 'bracket support';
+  const support = document.createElement('div');
+  support.className = 'bracket support';
 
-        const supportWidth = Math.max(width / 10, 6); // minimalna szerokość: 6px
-        support.style.width = supportWidth + 'px';
-        support.style.left = (width / 2 - supportWidth / 2) + 'px';
+  const supportWidth = Math.max(width / 10, 6); // szerokość zależna od długości rury
+  support.style.width = supportWidth + 'px';
+  support.style.left = '50%';
+  support.style.transform = 'translateX(-50%)';
 
-        rod.appendChild(support);
-        }
+  rod.appendChild(support);
+}
 
         row.appendChild(rod);
 
