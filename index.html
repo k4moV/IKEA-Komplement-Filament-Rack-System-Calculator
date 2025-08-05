@@ -120,15 +120,26 @@
       background-color: red;
     }
 
-    .bracket.support {
+   /* .bracket.support {
       background-color: yellow;
-      /* width: auto; */
+      /* width: auto; 
       height: 20px;
       position: absolute;
       top: 0;
       border: 1px solid red;
       z-index: 2;
-    }
+    }*/
+
+    .bracket.support {
+  display: inline-block;
+  vertical-align: top;
+ /* border: 1px solid red; /* jeśli chcesz widzieć obrys */
+  box-sizing: border-box;
+  /* szerokość i wysokość nadawane z JS */
+  /* marginesy nadawane z JS */
+  position: static; /* usuwamy absolute */
+  z-index: 1;
+}
 
     .rod {
       height: 20px;
@@ -326,10 +337,74 @@
       });
       document.getElementById('ikeaList').innerHTML = ikeaHTML;
 
-      renderVisualization(segments, rodColor);
+
+function renderVisualization(segments, color) {
+  const container = document.getElementById('visualization');
+  container.innerHTML = '';
+  const row = document.createElement('div');
+  row.className = 'shelf-row';
+
+  const left = document.createElement('div');
+  left.className = 'bracket left';
+  row.appendChild(left);
+
+  segments.forEach((seg, index) => {
+    const colorCode = color === 'gray' ? '#666' : '#ccc';
+
+    if (seg === 75 || seg === 100) {
+      // Połówki rury
+      const halfWidth = ROD_LENGTHS[seg] / 10; // połowa szerokości, bo dzielimy na 2
+
+      // Lewa połówka rury
+      const leftHalf = document.createElement('div');
+      leftHalf.className = 'rod';
+      leftHalf.style.backgroundColor = colorCode;
+      leftHalf.style.width = halfWidth + 'px';
+      row.appendChild(leftHalf);
+
+      // Żółty znacznik - wspornik
+      const support = document.createElement('div');
+      support.className = 'bracket support';
+      support.style.width = '8px';  // stała szerokość znacznika
+      support.style.backgroundColor = 'yellow';
+      support.style.height = '20px';
+      support.style.margin = '0 2px'; // lekki odstęp po bokach
+      row.appendChild(support);
+
+      // Prawa połówka rury
+      const rightHalf = document.createElement('div');
+      rightHalf.className = 'rod';
+      rightHalf.style.backgroundColor = colorCode;
+      rightHalf.style.width = halfWidth + 'px';
+      row.appendChild(rightHalf);
+    } else {
+      // Cała rura (np. 50cm)
+      const rod = document.createElement('div');
+      rod.className = 'rod';
+      rod.style.backgroundColor = colorCode;
+      rod.style.width = (ROD_LENGTHS[seg] / 5) + 'px';
+      row.appendChild(rod);
     }
 
-    function renderVisualization(segments, color) {
+    // Dodajemy łącznik jeśli nie ostatni segment
+    if (index < segments.length - 1) {
+      const connector = document.createElement('div');
+      connector.className = 'bracket connector';
+      row.appendChild(connector);
+    }
+  });
+
+  const right = document.createElement('div');
+  right.className = 'bracket right';
+  row.appendChild(right);
+
+  container.appendChild(row);
+}
+      
+     /* renderVisualization(segments, rodColor);
+    }
+
+    /*function renderVisualization(segments, color) {
       const container = document.getElementById('visualization');
       container.innerHTML = '';
       const row = document.createElement('div');
@@ -353,7 +428,7 @@
           support.style.left = (width / 2 - supportWidth / 2) + 'px';
           support.style.transform = 'translateX(-50%)';
           rod.appendChild(support);
-        }*/
+        }
         if (seg === 75 || seg === 100) {
   const support = document.createElement('div');
   support.className = 'bracket support';
@@ -380,7 +455,7 @@ support.style.transform = ''; // Niepotrzebne, bo już offsetujesz ręcznie
       row.appendChild(right);
 
       container.appendChild(row);
-    }
+    }*/
   </script>
 </body>
 </html>
